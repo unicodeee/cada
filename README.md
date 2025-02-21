@@ -1,4 +1,4 @@
-Here’s a clean and concise version of the README for your project setup:
+Got it! Here's the updated README to reflect that you're using Next.js for both the frontend and backend:
 
 ---
 
@@ -6,7 +6,7 @@ Here’s a clean and concise version of the README for your project setup:
 
 ## Project Setup
 
-This project is divided into two parts: the **backend** (Kotlin) and the **frontend** (Svelte). The goal is to make it easy for the team to set up and run the project using Docker, without requiring local installations of tools like npm or PostgreSQL.
+This project uses **Next.js** for both the **frontend** and **backend**. The goal is to make it easy for the team to set up and run the project using Docker, without requiring local installations of tools like npm or PostgreSQL.
 
 ### Prerequisites
 
@@ -26,18 +26,18 @@ To spin up both the backend and the PostgreSQL database using Docker:
    cd cada-app
    ```
 
-3. Run Docker Compose to build and start both services (backend and PostgreSQL):
+3. Run Docker Compose to build and start both services (Next.js and PostgreSQL):
    ```bash
    docker-compose up --build
    ```
 
 This command will:
 - Start a PostgreSQL database on port `5432`.
-- Start the Kotlin backend on port `8080`, connected to the PostgreSQL database.
+- Start the Next.js app (acting as both frontend and backend) on port `3000`, connected to the PostgreSQL database.
 
-### Frontend Setup (Svelte)
+### Next.js Setup (Frontend and Backend)
 
-If you need to work with the frontend (Svelte), follow these steps:
+If you need to work with the frontend and backend in the same project, follow these steps:
 
 1. **Install Node.js** (if not already installed):
    ```bash
@@ -47,20 +47,38 @@ If you need to work with the frontend (Svelte), follow these steps:
 
 2. **Install dependencies**:
    ```bash
-   npm install -g pnpm
+   npm install
    ```
 
-3. **Run the frontend development server**:
+3. **Run the Next.js development server**:
    ```bash
-   pnpm dev
+   npm run dev
    ```
 
-   This will start the Svelte frontend on `http://localhost:3000`.
+   This will start the Next.js app on `http://localhost:3000`.
+
+### Database Setup with Prisma
+
+To set up Prisma with your PostgreSQL database:
+
+1. **Install Prisma CLI**:
+   If you haven't already installed Prisma, you can do so with the following command:
+   ```bash
+   npm install prisma --save-dev
+   ```
+
+2. **Reserve the Schema**:
+   Run the following Prisma command to generate the initial migration and reserve the database schema:
+   ```bash
+   npx prisma migrate dev --name init
+   ```
+
+   This will create the necessary tables and schema in your PostgreSQL database and apply any defined migrations.
 
 ### Configuration
-- **Database**: PostgreSQL is used for the database and is managed through Docker Compose.
 
-### Environment Variables
+- **Database**: PostgreSQL is used for the database and is managed through Docker Compose.
+- **Prisma**: The Prisma client connects to PostgreSQL to manage database operations.
 
 The following environment variables are defined in the `docker-compose.yml` for the backend to connect to PostgreSQL:
 
@@ -76,6 +94,9 @@ To stop the services, run the following command:
 docker-compose down
 ```
 
----
+### Important Notes
 
-You can now copy and paste this README to your project directory. This format provides clear instructions for your team to set up and run the project easily using Docker.
+- After editing the database schema, run the following command to apply the latest migration:
+  ```bash
+  npx prisma migrate dev --name init
+  ```
