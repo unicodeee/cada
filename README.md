@@ -38,19 +38,23 @@ This command will:
 ### Next.js Setup (Frontend and Backend)
 
 If you need to work with the frontend and backend in the same project, follow these steps:
+1. **Install [brew](https://brew.sh/)** (if not already installed):
+   ```bash
+   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+   ```
 
-1. **Install Node.js** (if not already installed):
+2. **Install Node.js** (if not already installed):
    ```bash
    brew update
    brew install node
    ```
 
-2. **Install dependencies**:
+3. **Install dependencies**:
    ```bash
    npm install
    ```
 
-3. **Run the Next.js development server**:
+4. **Run the Next.js development server**:
    ```bash
    npm run dev
    ```
