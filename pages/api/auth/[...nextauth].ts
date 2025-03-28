@@ -1,7 +1,7 @@
-import NextAuth, {NextAuthOptions} from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import {prisma} from "@/prisma/prisma";
-import {NextApiRequest, NextApiResponse} from "next";
+import { prisma } from "@/prisma/prisma";
+import { NextApiRequest, NextApiResponse } from "next";
 
 export const authOptions: NextAuthOptions = {
     session: {
@@ -43,13 +43,13 @@ export const authOptions: NextAuthOptions = {
 
             return true; // Allow sign-in
         },
-        async jwt({token, account}) {
+        async jwt({token, account, profile}) {
             if (account) {
                 token.accessToken = account.access_token;
             }
             return token;
         },
-        async session({session}) {
+        async session({session, token}) {
             // if (token) {
             //     session.accessToken = token.accessToken;
             // }
@@ -59,6 +59,4 @@ export const authOptions: NextAuthOptions = {
 };
 
 // Default export as Next.js API route handler
-
-const auth  = (req: NextApiRequest, res: NextApiResponse) => NextAuth(req, res, authOptions);
-export default auth;
+export default (req: NextApiRequest, res: NextApiResponse) => NextAuth(req, res, authOptions);
