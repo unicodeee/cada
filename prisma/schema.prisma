@@ -10,7 +10,9 @@ datasource db {
 enum Gender {
   Male
   Female
-  Other
+  Lesbian
+  Gay
+  Trans
 }
 
 model User {
@@ -19,21 +21,20 @@ model User {
   email         String             @unique
   phone         String?
   avatar        String?            @map("avatar_photo_url")
-  profiles      Profile?
-  preferences   Preference?
-  swipes        Swipe[]            @relation("Swiper")
-  swiped        Swipe[]            @relation("Swiped")
+  profile       Profile?
+  preference    Preference?
+  swipedUsers   Swipe[]            @relation("Swiper")
+  swipingUsers  Swipe[]            @relation("Swiped")
   messages      Message[]
   studySessions UserStudySession[]
   matches1      Match[]            @relation("User1")
   matches2      Match[]            @relation("User2")
-
-  StudySession StudySession[]
+  studyGroups   StudySession[]
 }
 
 model Profile {
   id                String   @id @default(uuid()) @db.Uuid
-  userId            String   @unique
+  userId            String   @unique @db.Uuid
   gender            Gender?
   hobbies           String[]
   description       String?
@@ -45,7 +46,7 @@ model Profile {
 
 model Preference {
   id               String  @id @default(uuid()) @db.Uuid
-  userId           String  @unique
+  userId           String  @unique @db.Uuid
   genderPreference String?
   minAge           Int?
   maxAge           Int?
@@ -54,8 +55,8 @@ model Preference {
 
 model Swipe {
   id         String   @id @default(uuid()) @db.Uuid
-  swiperId   String
-  swipedId   String
+  swiperId   String   @db.Uuid
+  swipedId   String   @db.Uuid
   dateAt     DateTime @default(now())
   swipeRight Boolean
   swiper     User     @relation("Swiper", fields: [swiperId], references: [id], onDelete: Cascade)
@@ -66,20 +67,20 @@ model Swipe {
 
 model Match {
   id               String            @id @default(uuid()) @db.Uuid
-  user1Id          String
-  user2Id          String
+  user1Id          String            @db.Uuid
+  user2Id          String            @db.Uuid
   dateCreated      DateTime          @default(now())
   user1            User              @relation("User1", fields: [user1Id], references: [id], onDelete: Cascade)
   user2            User              @relation("User2", fields: [user2Id], references: [id], onDelete: Cascade)
-  Message          Message[]
-  UnmatchCountdown UnmatchCountdown?
+  messages         Message[]
+  unmatchCountdown UnmatchCountdown?
 
   @@unique([user1Id, user2Id])
 }
 
 model UnmatchCountdown {
   id        String   @id @default(uuid()) @db.Uuid
-  matchId   String
+  matchId   String   @db.Uuid
   expiresAt DateTime
   match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
 
@@ -95,10 +96,10 @@ enum MessageType {
 model Message {
   id       String      @id @default(uuid()) @db.Uuid
   content  String
-  userId   String
+  userId   String      @db.Uuid
   dateSent DateTime    @default(now())
   type     MessageType
-  matchId  String
+  matchId  String      @db.Uuid
   user     User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   match    Match       @relation(fields: [matchId], references: [id], onDelete: Cascade)
 }
@@ -106,16 +107,15 @@ model Message {
 model SchoolEvent {
   id          String   @id @default(uuid()) @db.Uuid
   description String
-  time        DateTime
-  date        DateTime
+  eventTime   DateTime
   photoUrl    String?  @map("photo_url")
 }
 
 model StudySession {
   id          String             @id @default(uuid()) @db.Uuid
   location    String
-  eventTime   DateTime // Consolidated time and date
-  createdById String?
+  eventTime   DateTime
+  createdById String?            @db.Uuid
   createdBy   User?              @relation(fields: [createdById], references: [id], onDelete: SetNull)
   users       UserStudySession[]
 }
