@@ -27,7 +27,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         } catch (error) {
             return res.status(500).json({ message: "Server error", error });
         }
-    } else if (req.method === 'POST') {
+    } else if (req.method === 'POST') { // update
         // Create or update the profile for the logged-in user
         const { gender, hobbies, description, yearBorn, sexualOrientation, photos } = req.body;
 
@@ -35,6 +35,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const existingProfile = await prisma.profile.findUnique({
                 where: { userId },
             });
+
 
             if (existingProfile) {
                 // Update existing profile

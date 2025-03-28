@@ -1,6 +1,7 @@
 "use client";
 
 import { signOut } from "next-auth/react";
+import SignOutButton from "@components/SignOutButton";
 
 interface UserProfileProps {
     name: string;
@@ -18,6 +19,7 @@ const UserProfile = ({ name, email, image }: UserProfileProps) => {
                     className="w-32 h-32 rounded-full object-cover"
                 />
                 <h2 className="text-2xl font-bold">{name}</h2>
+                <h2 className="text-2xl font-bold">Log in</h2>
                 <p className="text-sm text-gray-500">{email}</p>
             </div>
             <button
@@ -26,6 +28,8 @@ const UserProfile = ({ name, email, image }: UserProfileProps) => {
             >
                 Sign Out
             </button>
+
+            <SignOutButton/>
         </div>
     );
 };
