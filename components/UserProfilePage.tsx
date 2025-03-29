@@ -1,7 +1,8 @@
 "use client";
 
-import { signOut } from "next-auth/react";
 import SignOutButton from "@components/SignOutButton";
+
+import Image from "next/image"
 
 interface UserProfileProps {
     name: string;
@@ -13,7 +14,7 @@ const UserProfile = ({ name, email, image }: UserProfileProps) => {
     return (
         <div className="flex flex-col items-center justify-center w-full max-w-md p-6 bg-white shadow-lg rounded-lg dark:bg-gray-800 dark:text-white">
             <div className="flex flex-col items-center gap-4">
-                <img
+                <Image
                     src={image || "/emptyAvatar.jpg"} // fallback to a default image if no image is provided
                     alt="Profile Picture"
                     className="w-32 h-32 rounded-full object-cover"

@@ -1,5 +1,3 @@
-import { signIn } from "next-auth/react";
-
 interface SignInButtonProps {
     onClick: () => void;
 }

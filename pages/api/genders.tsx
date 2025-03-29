@@ -1,7 +1,6 @@
 // pages/api/users/[id].ts
-import { NextApiRequest, NextApiResponse } from 'next';
-import { getSession } from 'next-auth/react';
-import { prisma } from '@/prisma/prisma';
+import {NextApiRequest, NextApiResponse} from 'next';
+import {getSession} from 'next-auth/react';
 
 export default async function handler(
     req: NextApiRequest,
