@@ -3,11 +3,9 @@
 // pages/profilepage1.tsx
 
 
-
 import React from "react";
 
 import Image from "next/image";
-import {motion} from 'framer-motion';
 
 const ProfilePage = () => {
     // Mock user data
@@ -25,9 +23,8 @@ const ProfilePage = () => {
             <div className="w-full max-w-md p-6 bg-white shadow-lg rounded-lg dark:bg-gray-800 dark:text-white">
                 {/* Profile Image */}
                 <div className="flex justify-center">
-                    <motion.div>
+
                         <Image src={user.image} alt="Profile Picture" className="w-32 h-32 rounded-full object-cover" width={500} height={500}/>
-                    </motion.div>
 
 
                 </div>
