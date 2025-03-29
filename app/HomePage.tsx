@@ -4,8 +4,11 @@ import {signIn, useSession} from "next-auth/react";
 import UserProfile from "@components/UserProfilePage";
 import SignInButton from "@components/SignInButton";
 
+
 export default function HomePage() {
     const { data: session, status } = useSession();
+
+    console.log("Session Data:", session); // Log session data
 
     if (status === "loading") {
         return (
@@ -27,11 +30,12 @@ export default function HomePage() {
     }
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen p-8 pb-20 gap-8 sm:p-20 bg-gray-50 dark:bg-gray-900">
+        <div
+            className="flex flex-col items-center justify-center min-h-screen p-8 pb-20 gap-8 sm:p-20 bg-gray-50 dark:bg-gray-900">
             <UserProfile
                 name={session.user?.name || "User"}
                 email={session.user?.email || "No email"}
-                // image={session.user?.image}
+                image={session.user?.image || undefined}
             />
         </div>
     );

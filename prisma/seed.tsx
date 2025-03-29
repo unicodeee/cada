@@ -3,7 +3,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
-import { prisma } from './prisma';
+import { prisma } from "@/prisma/prisma";
+
 
 async function main() {
     // Clear existing data
@@ -58,7 +59,8 @@ async function main() {
             data: {
                 id: uuidv4(),
                 userId: user.id,
-                gender: Math.random() > 0.5 ? 'Male' : (Math.random() > 0.5 ? 'Female' : 'Other'),
+                // gender: Math.random() > 0.5 ? 'Male' : (Math.random() > 0.5 ? 'Female' : 'Other'),
+                gender: 'Male',
                 hobbies: ['Reading', 'Hiking', 'Photography', 'Cooking'].sort(() => Math.random() - 0.5).slice(0, Math.floor(Math.random() * 3) + 1),
                 description: `Hi, I'm ${user.name}! I'm studying at University and looking to connect with other students.`,
                 yearBorn: 1995 + Math.floor(Math.random() * 10),

@@ -9,7 +9,8 @@ import { getUserSession } from "@lib/session";
 import {SessionProvider} from "next-auth/react";
 export default function Home() {
 
-  // const user = await getUserSession();
+  const user =  getUserSession();
+  console.log("user: ", user);
   return (
       <div>
           <SessionProvider>
