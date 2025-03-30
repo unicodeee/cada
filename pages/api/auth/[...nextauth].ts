@@ -17,8 +17,12 @@ export const authOptions: NextAuthOptions = {
     callbacks: {
         async signIn({user, profile}) {
             // Check if the profile email exists
-            console.log("Profile:", profile);
-            console.log("User:", user);
+
+            if (!user || !profile?.email) {
+                console.error("Missing user or profile information");
+                return "/login?error=OAuthCanceled"; // Redirect on missing data
+            }
+
             if (!user?.email) {
 
                 throw new Error("User doesn't exist!");
@@ -28,18 +32,23 @@ export const authOptions: NextAuthOptions = {
             }
 
             // Use Prisma `upsert` to create or update the user
-            await prisma.user.upsert({
-                where: {email: profile.email},
-                update: {
-                    name: profile.name,   // Update user's name if they already exist
-                    // image: profile.picture, // Update user's profile picture
-                },
-                create: {
-                    email: profile.email, // Create user if they don't exist
-                    name: profile.name!,
-                    // image: profile.picture,
-                },
-            });
+            try {
+                await prisma.user.upsert({
+                    where: {email: profile.email},
+                    update: {
+                        name: profile.name,   // Update user's name if they already exist
+                        // image: profile.picture, // Update user's profile picture
+                    },
+                    create: {
+                        email: profile.email, // Create user if they don't exist
+                        name: profile.name!,
+                        // image: profile.picture,
+                    },
+                })
+            } catch (err) {
+                console.error("Prisma upsert error:", err);
+                return "/login?error=DatabaseError"; // Redirect on DB errors
+            };
 
             return true; // Allow sign-in
         },
