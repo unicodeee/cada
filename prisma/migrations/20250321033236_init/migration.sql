@@ -1,35 +1,24 @@
-/*
-  Warnings:
-
-  - The primary key for the `User` table will be changed. If it partially fails, the table could be left without primary key constraint.
-  - You are about to drop the `Post` table. If the table is not empty, all the data it contains will be lost.
-
-*/
 -- CreateEnum
 CREATE TYPE "Gender" AS ENUM ('Male', 'Female', 'Other');
 
 -- CreateEnum
 CREATE TYPE "MessageType" AS ENUM ('Media', 'Text', 'Icon');
 
--- DropForeignKey
-ALTER TABLE "Post" DROP CONSTRAINT "Post_authorId_fkey";
+-- CreateTable
+CREATE TABLE "User" (
+    "id" UUID NOT NULL,
+    "name" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "phone" TEXT,
+    "avatar_photo_url" TEXT,
 
--- AlterTable
-ALTER TABLE "User" DROP CONSTRAINT "User_pkey",
-ADD COLUMN     "avatar_photo_url" TEXT,
-ADD COLUMN     "phone" TEXT,
-ALTER COLUMN "id" DROP DEFAULT,
-ALTER COLUMN "id" SET DATA TYPE TEXT,
-ADD CONSTRAINT "User_pkey" PRIMARY KEY ("id");
-DROP SEQUENCE "User_id_seq";
-
--- DropTable
-DROP TABLE "Post";
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "Profile" (
-    "id" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
+    "id" UUID NOT NULL,
+    "userId" UUID NOT NULL,
     "gender" "Gender",
     "hobbies" TEXT[],
     "description" TEXT,
@@ -42,8 +31,8 @@ CREATE TABLE "Profile" (
 
 -- CreateTable
 CREATE TABLE "Preference" (
-    "id" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
+    "id" UUID NOT NULL,
+    "userId" UUID NOT NULL,
     "genderPreference" TEXT,
     "minAge" INTEGER,
     "maxAge" INTEGER,
@@ -53,9 +42,9 @@ CREATE TABLE "Preference" (
 
 -- CreateTable
 CREATE TABLE "Swipe" (
-    "id" TEXT NOT NULL,
-    "swiperId" TEXT NOT NULL,
-    "swipedId" TEXT NOT NULL,
+    "id" UUID NOT NULL,
+    "swiperId" UUID NOT NULL,
+    "swipedId" UUID NOT NULL,
     "dateAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "swipeRight" BOOLEAN NOT NULL,
 
@@ -64,9 +53,9 @@ CREATE TABLE "Swipe" (
 
 -- CreateTable
 CREATE TABLE "Match" (
-    "id" TEXT NOT NULL,
-    "user1Id" TEXT NOT NULL,
-    "user2Id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
+    "user1Id" UUID NOT NULL,
+    "user2Id" UUID NOT NULL,
     "dateCreated" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Match_pkey" PRIMARY KEY ("id")
@@ -74,8 +63,8 @@ CREATE TABLE "Match" (
 
 -- CreateTable
 CREATE TABLE "UnmatchCountdown" (
-    "id" TEXT NOT NULL,
-    "matchId" TEXT NOT NULL,
+    "id" UUID NOT NULL,
+    "matchId" UUID NOT NULL,
     "expiresAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "UnmatchCountdown_pkey" PRIMARY KEY ("id")
@@ -83,22 +72,21 @@ CREATE TABLE "UnmatchCountdown" (
 
 -- CreateTable
 CREATE TABLE "Message" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
     "content" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
+    "userId" UUID NOT NULL,
     "dateSent" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "type" "MessageType" NOT NULL,
-    "matchId" TEXT NOT NULL,
+    "matchId" UUID NOT NULL,
 
     CONSTRAINT "Message_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "SchoolEvent" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
     "description" TEXT NOT NULL,
-    "time" TIMESTAMP(3) NOT NULL,
-    "date" TIMESTAMP(3) NOT NULL,
+    "eventTime" TIMESTAMP(3) NOT NULL,
     "photo_url" TEXT,
 
     CONSTRAINT "SchoolEvent_pkey" PRIMARY KEY ("id")
@@ -106,21 +94,24 @@ CREATE TABLE "SchoolEvent" (
 
 -- CreateTable
 CREATE TABLE "StudySession" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
     "location" TEXT NOT NULL,
     "eventTime" TIMESTAMP(3) NOT NULL,
-    "createdById" TEXT,
+    "createdById" UUID,
 
     CONSTRAINT "StudySession_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "UserStudySession" (
-    "userId" TEXT NOT NULL,
-    "studySessionId" TEXT NOT NULL,
+    "userId" UUID NOT NULL,
+    "studySessionId" UUID NOT NULL,
 
     CONSTRAINT "UserStudySession_pkey" PRIMARY KEY ("userId","studySessionId")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Profile_userId_key" ON "Profile"("userId");
