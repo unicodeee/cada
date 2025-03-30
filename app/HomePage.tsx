@@ -8,8 +8,6 @@ import SignInButton from "@components/SignInButton";
 export default function HomePage() {
     const { data: session, status } = useSession();
 
-    console.log("Session Data:", session); // Log session data
-
     if (status === "loading") {
         return (
             <div className="flex items-center justify-center min-h-screen">
