@@ -42,7 +42,7 @@ export const authOptions: NextAuthOptions = {
                     create: {
                         email: profile.email, // Create user if they don't exist
                         name: profile.name!,
-                        // image: profile.picture,
+                        avatar: profile.image!,
                     },
                 })
             } catch (err) {
@@ -59,9 +59,6 @@ export const authOptions: NextAuthOptions = {
             return token;
         },
         async session({session}) {
-            // if (token) {
-            //     session.accessToken = token.accessToken;
-            // }
             return session;
         },
     },
