@@ -7,21 +7,27 @@
 // Asexual: Lack of sexual attraction to any gender
 // Queer: An umbrella term encompassing non-heterosexual identities
 
-export const sexualOrientations = [
-    "Heterosexual",
-    "Homosexual",
-    "Bisexual",
-    "Pansexual",
-    "Asexual",
-    "Queer",
-];
+export const allSexualOrientations = () => {
+    return {
+        heterosexual: "Heterosexual",
+        homosexual: "Homosexual",
+        bisexual: "Bisexual",
+        pansexual: "Pansexual",
+        asexual: "Asexual",
+        queer: "Queer"
+    };
+};
 
-export const allGenders = [
-    "Male",
-    "Female",
-    "Gay",
-    "Lesbian",
-    "Trans Man",
-    "Trans Woman"
-];
+
+export const allGenders = () => {
+    return {
+        male: "Male",
+        female: "Female",
+        gay: "Gay",
+        lesbian: "Lesbian",
+        transMan: "Trans Man",
+        transWoman: "Trans Woman"
+    };
+};
+
 

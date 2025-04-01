@@ -3,6 +3,7 @@ import GoogleProvider from "next-auth/providers/google";
 import {prisma} from "@/prisma/prisma";
 import {NextApiRequest, NextApiResponse} from "next";
 
+
 export const authOptions: NextAuthOptions = {
     session: {
         strategy: "jwt",
@@ -52,9 +53,12 @@ export const authOptions: NextAuthOptions = {
 
             return true; // Allow sign-in
         },
-        async jwt({token, account}) {
+        async jwt({token, account, user}) {
             if (account) {
                 token.accessToken = account.access_token;
+            }
+            if (user) {
+                token.id = user.id;
             }
             return token;
         },

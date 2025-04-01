@@ -33,17 +33,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 async function getAllProfile( res: NextApiResponse) {
     try {
-        console.log("profiles: ");
-
-        const profiles = await prisma.profile.findMany();
-        console.log("profiles: ", profiles);
+        const profiles = await prisma.profile.findMany({take: 10});
 
         if (profiles.length === 0) {
             return res.status(404).json({ message: "No profiles found" });
         }
-
-        console.log("profiles: ", profiles);
-
         return res.status(200).json(profiles);
     } catch (error) {
         return res.status(500).json({ message: "Server error", error });

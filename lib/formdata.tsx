@@ -14,22 +14,22 @@ import { z } from "zod"
 
 // Enum validation for Gender
 const GenderEnum = z.enum([
-    "Male",
-    "Female",
-    "Gay",
-    "Lesbian",
-    "TransMan",
-    "TransWoman",
+    "male",
+    "female",
+    "gay",
+    "lesbian",
+    "transman",
+    "transwoman",
 ]);
 
 // Enum validation for Sexual Orientation
 const SexualOrientationEnum = z.enum([
-    "Heterosexual",
-    "Homosexual",
-    "Bisexual",
-    "Pansexual",
-    "Asexual",
-    "Queer",
+    "heterosexual",
+    "homosexual",
+    "bisexual",
+    "pansexual",
+    "asexual",
+    "queer",
 ]);
 
 
