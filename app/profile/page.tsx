@@ -7,10 +7,11 @@ import {Input} from "@components/ui/input";
 import {Button} from "@components/ui/button";
 import {useSession} from "next-auth/react";
 
-import {allGenders, allSexualOrientations} from "@lib/data";
+import {allGenders, allSexualOrientations, allYearsBorn} from "@lib/data";
 
 export default function ProfilePage() {
     const { data: session } = useSession();
+    
 
     return (
         <div
@@ -28,14 +29,14 @@ export default function ProfilePage() {
                             <form>
                                 <div className="grid w-full items-center gap-4">
                                     <div className="flex flex-col space-y-1.5">
-                                        <Label htmlFor="preferedName">Prefered Name</Label>
-                                        <Input id="preferedName" placeholder="Your prefered name"/>
+                                        <Label htmlFor="preferredName">Preferred Name</Label>
+                                        <Input id="preferredName" placeholder="Your preferred name"/>
                                     </div>
                                     <div className="flex flex-col space-y-1.5">
-                                        <Label htmlFor="genders">Genders</Label>
+                                        <Label htmlFor="gender">Gender</Label>
                                         <Select>
-                                            <SelectTrigger id="genders">
-                                                <SelectValue placeholder="Select Your Genders"/>
+                                            <SelectTrigger id="gender">
+                                                <SelectValue placeholder="Select your gender"/>
                                             </SelectTrigger>
                                             <SelectContent position="popper">
                                                 {Object.entries(allGenders()).map(([key, value]) => (
@@ -47,10 +48,10 @@ export default function ProfilePage() {
                                         </Select>
                                     </div>
                                     <div className="flex flex-col space-y-1.5">
-                                        <Label htmlFor="sexualOrientations">Sexual Orientations</Label>
+                                        <Label htmlFor="sexualOrientation">Sexual Orientation</Label>
                                         <Select>
-                                            <SelectTrigger id="sexualOrientations">
-                                                <SelectValue placeholder="Select Your sexualOrientations"/>
+                                            <SelectTrigger id="sexualOrientation">
+                                                <SelectValue placeholder="Select your sexual orientation"/>
                                             </SelectTrigger>
                                             <SelectContent position="popper">
                                                 {Object.entries(allSexualOrientations()).map(([key, value]) => (
@@ -60,6 +61,33 @@ export default function ProfilePage() {
                                                 ))}
                                             </SelectContent>
                                         </Select>
+                                    </div>
+                                    <div className="flex flex-col space-y-1.5">
+                                        <Label htmlFor="yearBorn">Year Born</Label>
+                                        <Select>
+                                            <SelectTrigger id="yearBorn">
+                                                <SelectValue placeholder="Select your year born"/>
+                                            </SelectTrigger>
+                                            <SelectContent position="popper">
+                                                {Object.entries(allYearsBorn()).map(([key, value]) => (
+                                                    <SelectItem key={key} value={key}>
+                                                        {value}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="flex flex-col space-y-1.5">
+                                        <Label htmlFor="hobbies">Hobbies</Label>
+                                        <Input id="hobbies" placeholder="Your hobbies"/>
+                                    </div>
+                                    <div className="flex flex-col space-y-1.5">
+                                        <Label htmlFor="description">Bio</Label>
+                                        <Input id="description" placeholder="Your bio"/>
+                                    </div>
+                                    <div className="flex flex-col space-y-1.5">
+                                        <Label htmlFor="description">Bio</Label>
+                                        <Input id="description" placeholder="Your bio"/>
                                     </div>
                                 </div>
                             </form>

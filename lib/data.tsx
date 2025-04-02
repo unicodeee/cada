@@ -30,4 +30,15 @@ export const allGenders = () => {
     };
 };
 
+export const allYearsBorn = () => {
+    const currentYear : number = new Date().getFullYear();
+    const startYear = currentYear - 50;
+    var years = [];
+    for (let i = startYear; i <= currentYear; i++) {
+        years.push(i);
+    };
+    return years;
+
+};
+
 
