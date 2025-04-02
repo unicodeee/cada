@@ -104,3 +104,10 @@ docker-compose down
   ```bash
   npx prisma migrate dev --name init
   ```
+
+- Check Before push:
+  ```bash
+  npm run lint
+  pnpm install
+  pnpm run build
+  ```

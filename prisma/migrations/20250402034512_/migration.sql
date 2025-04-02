@@ -1,5 +1,8 @@
 -- CreateEnum
-CREATE TYPE "Gender" AS ENUM ('Male', 'Female', 'Other');
+CREATE TYPE "Gender" AS ENUM ('male', 'female', 'gay', 'lesbian', 'transman', 'transwoman');
+
+-- CreateEnum
+CREATE TYPE "SexualOrientation" AS ENUM ('heterosexual', 'homosexual', 'bisexual', 'pansexual', 'asexual', 'queer');
 
 -- CreateEnum
 CREATE TYPE "MessageType" AS ENUM ('Media', 'Text', 'Icon');
@@ -10,7 +13,7 @@ CREATE TABLE "User" (
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "phone" TEXT,
-    "avatar_photo_url" TEXT,
+    "avatar" TEXT,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -19,11 +22,12 @@ CREATE TABLE "User" (
 CREATE TABLE "Profile" (
     "id" UUID NOT NULL,
     "userId" UUID NOT NULL,
+    "preferredName" TEXT,
     "gender" "Gender",
     "hobbies" TEXT[],
     "description" TEXT,
     "yearBorn" INTEGER,
-    "sexualOrientation" TEXT,
+    "sexualOrientation" "SexualOrientation",
     "photos" TEXT[],
 
     CONSTRAINT "Profile_pkey" PRIMARY KEY ("id")
@@ -87,7 +91,7 @@ CREATE TABLE "SchoolEvent" (
     "id" UUID NOT NULL,
     "description" TEXT NOT NULL,
     "eventTime" TIMESTAMP(3) NOT NULL,
-    "photo_url" TEXT,
+    "photoUrl" TEXT,
 
     CONSTRAINT "SchoolEvent_pkey" PRIMARY KEY ("id")
 );

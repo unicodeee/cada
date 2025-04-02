@@ -1,7 +1,10 @@
-import NextAuth, {NextAuthOptions} from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
+
 import GoogleProvider from "next-auth/providers/google";
 import {prisma} from "@/prisma/prisma";
 import {NextApiRequest, NextApiResponse} from "next";
+
+
 
 export const authOptions: NextAuthOptions = {
     session: {
@@ -42,7 +45,7 @@ export const authOptions: NextAuthOptions = {
                     create: {
                         email: profile.email, // Create user if they don't exist
                         name: profile.name!,
-                        // image: profile.picture,
+                        avatar: profile.image!,
                     },
                 })
             } catch (err) {
@@ -52,18 +55,34 @@ export const authOptions: NextAuthOptions = {
 
             return true; // Allow sign-in
         },
-        async jwt({token, account}) {
+        async jwt({token, account, profile}) {
             if (account) {
                 token.accessToken = account.access_token;
+            }
+
+            if (profile) {
+                try {
+                    const userInDb = await prisma.user.findUnique({
+                        where: {email: profile.email}
+                    })
+                    if (userInDb) {
+                        token.userId = userInDb.id;
+                    }
+
+                } catch (err) {
+                    console.error("Prisma upsert error:", err);
+                };
+
+                token.email = profile.email;
             }
             return token;
         },
         async session({session}) {
-            // if (token) {
-            //     session.accessToken = token.accessToken;
-            // }
             return session;
         },
+    },
+    pages: {
+        signIn: '/',
     },
 };
 

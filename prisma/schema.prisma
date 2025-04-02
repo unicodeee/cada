@@ -9,11 +9,21 @@ datasource db {
 }
 
 enum Gender {
-  Male
-  Female
-  Lesbian
-  Gay
-  Trans
+  male
+  female
+  gay
+  lesbian
+  transman
+  transwoman
+}
+
+enum SexualOrientation {
+  heterosexual
+  homosexual
+  bisexual
+  pansexual
+  asexual
+  queer
 }
 
 model User {
@@ -21,7 +31,7 @@ model User {
   name          String
   email         String             @unique
   phone         String?
-  avatar        String?            @map("avatar_photo_url")
+  avatar        String?
   profile       Profile?
   preference    Preference?
   swipedUsers   Swipe[]            @relation("Swiper")
@@ -34,15 +44,16 @@ model User {
 }
 
 model Profile {
-  id                String   @id @default(uuid()) @db.Uuid
-  userId            String   @unique @db.Uuid
+  id                String             @id @default(uuid()) @db.Uuid
+  userId            String             @unique @db.Uuid
+  preferredName     String?
   gender            Gender?
   hobbies           String[]
   description       String?
   yearBorn          Int?
-  sexualOrientation String?
+  sexualOrientation SexualOrientation?
   photos            String[]
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Preference {
@@ -109,7 +120,7 @@ model SchoolEvent {
   id          String   @id @default(uuid()) @db.Uuid
   description String
   eventTime   DateTime
-  photoUrl    String?  @map("photo_url")
+  photoUrl    String?
 }
 
 model StudySession {
