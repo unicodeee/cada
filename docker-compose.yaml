@@ -4,8 +4,8 @@ services:
     image: postgres:13
     container_name: cada-postgres
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_USER: cadauser
+      POSTGRES_PASSWORD: cadapassword
       POSTGRES_DB: cada
     ports:
       - "5432:5432"

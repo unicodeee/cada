@@ -4,11 +4,13 @@ import * as React from "react"
 import {Button} from "@/components/ui/button"
 import {signIn, useSession} from "next-auth/react";
 import UserCard from "@components/usercard";
+import {Icons} from "@components/ui/icons";
 
 
 export default function CardWithForm() {
 
     const { data: session, status } = useSession();
+
 
 
     if (status === "loading") {
@@ -25,7 +27,8 @@ export default function CardWithForm() {
                 <main className="flex flex-col gap-6 items-center text-center">
                     <h1 className="text-5xl font-bold">Welcome to CADA: Campus Dating</h1>
                     <Button className="px-6 py-3 text-lg sm:text-xl font-semibold" onClick={() => signIn("google")}>
-                        Sign in
+                        Sign in with Google
+                        <Icons.google className="w-6 h-6 text-blue-500" />
                     </Button>
                 </main>
             </div>
