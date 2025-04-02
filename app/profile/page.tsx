@@ -85,10 +85,7 @@ export default function ProfilePage() {
                                         <Label htmlFor="description">Bio</Label>
                                         <Input id="description" placeholder="Your bio"/>
                                     </div>
-                                    <div className="flex flex-col space-y-1.5">
-                                        <Label htmlFor="description">Bio</Label>
-                                        <Input id="description" placeholder="Your bio"/>
-                                    </div>
+                                    
                                 </div>
                             </form>
                         </CardContent>
