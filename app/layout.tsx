@@ -6,6 +6,7 @@ import { SessionProvider, useSession } from "next-auth/react";
 import ThemeToggler from "@components/ui/theme-toggler";
 import * as React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -59,6 +60,7 @@ interface RootLayoutProps {
 }
 
 export default function RootLayout({ children }: RootLayoutProps) {
+  const pathname = usePathname();
   return (
     <>
       <html lang="en" suppressHydrationWarning>
@@ -120,10 +122,10 @@ export default function RootLayout({ children }: RootLayoutProps) {
                 {/* Profile */}
                 <NavigationMenu>
                   <NavigationMenuList>
-                    <NavigationMenuItem >
+                    <NavigationMenuItem>
                       <Link href="/profile" legacyBehavior passHref>
                         <NavigationMenuLink
-                          className={navigationMenuTriggerStyle() + " bg-primary text-white"}
+                          className={navigationMenuTriggerStyle()}
                         >
                           Profile
                         </NavigationMenuLink>
@@ -151,7 +153,6 @@ function AuthNavigation() {
       {session && (
         <NavigationMenu>
           <NavigationMenuList>
-
             {/* Conditionally show Profile link if user is logged in */}
             <NavigationMenuItem>
               <Link href="/profile" legacyBehavior passHref>
