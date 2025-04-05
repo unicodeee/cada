@@ -1,11 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -13,4 +8,135 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Gender {
+  male
+  female
+  gay
+  lesbian
+  transman
+  transwoman
+}
 
+enum SexualOrientation {
+  heterosexual
+  homosexual
+  bisexual
+  pansexual
+  asexual
+  queer
+}
+
+model User {
+  id            String             @id @default(uuid()) @db.Uuid
+  name          String
+  email         String             @unique
+  phone         String?
+  avatar        String?
+  profile       Profile?
+  preference    Preference?
+  swipedUsers   Swipe[]            @relation("Swiper")
+  swipingUsers  Swipe[]            @relation("Swiped")
+  messages      Message[]
+  studySessions UserStudySession[]
+  matches1      Match[]            @relation("User1")
+  matches2      Match[]            @relation("User2")
+  studyGroups   StudySession[]
+}
+
+model Profile {
+  id                String             @id @default(uuid()) @db.Uuid
+  userId            String             @unique @db.Uuid
+  preferredName     String?
+  gender            Gender?
+  hobbies           String[]
+  description       String?
+  yearBorn          Int?
+  sexualOrientation SexualOrientation?
+  photos            String[]
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Preference {
+  id               String  @id @default(uuid()) @db.Uuid
+  userId           String  @unique @db.Uuid
+  genderPreference String?
+  minAge           Int?
+  maxAge           Int?
+  user             User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Swipe {
+  id         String   @id @default(uuid()) @db.Uuid
+  swiperId   String   @db.Uuid
+  swipedId   String   @db.Uuid
+  dateAt     DateTime @default(now())
+  swipeRight Boolean
+  swiper     User     @relation("Swiper", fields: [swiperId], references: [id], onDelete: Cascade)
+  swiped     User     @relation("Swiped", fields: [swipedId], references: [id], onDelete: Cascade)
+
+  @@unique([swiperId, swipedId])
+}
+
+model Match {
+  id               String            @id @default(uuid()) @db.Uuid
+  user1Id          String            @db.Uuid
+  user2Id          String            @db.Uuid
+  dateCreated      DateTime          @default(now())
+  user1            User              @relation("User1", fields: [user1Id], references: [id], onDelete: Cascade)
+  user2            User              @relation("User2", fields: [user2Id], references: [id], onDelete: Cascade)
+  messages         Message[]
+  unmatchCountdown UnmatchCountdown?
+
+  @@unique([user1Id, user2Id])
+}
+
+model UnmatchCountdown {
+  id        String   @id @default(uuid()) @db.Uuid
+  matchId   String   @db.Uuid
+  expiresAt DateTime
+  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  @@unique([matchId])
+}
+
+enum MessageType {
+  Media
+  Text
+  Icon
+}
+
+model Message {
+  id       String      @id @default(uuid()) @db.Uuid
+  content  String
+  userId   String      @db.Uuid
+  dateSent DateTime    @default(now())
+  type     MessageType
+  matchId  String      @db.Uuid
+  user     User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  match    Match       @relation(fields: [matchId], references: [id], onDelete: Cascade)
+}
+
+model SchoolEvent {
+  id          String   @id @default(uuid()) @db.Uuid
+  description String
+  eventTime   DateTime
+  photoUrl    String?
+}
+
+model StudySession {
+  id          String             @id @default(uuid()) @db.Uuid
+  location    String
+  eventTime   DateTime
+  createdById String?            @db.Uuid
+  createdBy   User?              @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  users       UserStudySession[]
+}
+
+model UserStudySession {
+  userId         String       @db.Uuid
+  studySessionId String       @db.Uuid
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  studySession   StudySession @relation(fields: [studySessionId], references: [id], onDelete: Cascade)
+
+  @@id([userId, studySessionId])
+}

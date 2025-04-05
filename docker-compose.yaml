@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_USER: cadauser
       POSTGRES_PASSWORD: cadapassword
-      POSTGRES_DB: cadadb
+      POSTGRES_DB: cada
     ports:
       - "5432:5432"
     volumes:
