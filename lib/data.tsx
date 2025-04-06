@@ -1,5 +1,3 @@
-
-
 // Heterosexual: Attraction to individuals of the opposite gender
 // Homosexual: Attraction to individuals of the same gender
 // Bisexual: Attraction to individuals of both genders
@@ -18,7 +16,6 @@ export const allSexualOrientations = () => {
     };
 };
 
-
 export const allGenders = () => {
     return {
         male: "Male",
@@ -31,14 +28,13 @@ export const allGenders = () => {
 };
 
 export const allYearsBorn = () => {
-    const currentYear : number = new Date().getFullYear();
+    const currentYear: number = new Date().getFullYear();
     const startYear = currentYear - 50;
-    var years = [];
+    const years: number[] = [];
     for (let i = startYear; i <= currentYear; i++) {
         years.push(i);
     };
     return years;
-
 };
 
 
