@@ -363,7 +363,7 @@ export default function ProfilePage() {
                                     </div>
 
                                     <div className="flex flex-col space-y-1.5">
-                                        <Label htmlFor="description">Bio</Label>
+                                        <Label htmlFor="description">About Me</Label>
                                         <Textarea
                                             id="description"
                                             placeholder="Tell us about yourself..."
@@ -371,6 +371,22 @@ export default function ProfilePage() {
                                             onChange={handleChange}
                                             className="min-h-[100px]"
                                         />
+                                    </div>
+
+                                    <div className="flex flex-col space-y-1.5">
+                                        <Label htmlFor="photo">Profile Photos</Label>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            className="w-full h-20 flex flex-col items-center justify-center gap-2"
+                                            onClick={() => router.push('/photo')}
+                                        >
+                                            <div className="text-lg">📸</div>
+                                            <span>Upload Photos</span>
+                                        </Button>
+                                        <p className="text-xs text-muted-foreground">
+                                            Upload up to 6 photos to showcase your best self.
+                                        </p>
                                     </div>
                                 </div>
 
