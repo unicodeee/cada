@@ -1,8 +1,19 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/prisma/prisma";
-import { profileSchema } from "@lib/formdata";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
+import { z } from "zod";
+
+// Define schema for profile data validation
+const profileSchema = z.object({
+    preferredName: z.string().optional(),
+    gender: z.enum(["male", "female", "gay", "lesbian", "transman", "transwoman"]).optional(),
+    hobbies: z.array(z.string()).optional(),
+    description: z.string().optional(),
+    yearBorn: z.number().int().min(1900).max(new Date().getFullYear()).optional(),
+    sexualOrientation: z.enum(["heterosexual", "homosexual", "bisexual", "pansexual", "asexual", "queer"]).optional(),
+    photos: z.array(z.string()).optional(),
+});
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     const session = await getServerSession(req, res, authOptions);
@@ -46,25 +57,56 @@ async function getProfileById(userId: string, res: NextApiResponse) {
 
 async function createOrUpdateProfile(userId: string, req: NextApiRequest, res: NextApiResponse) {
     try {
-        const parsedData = profileSchema.safeParse(req.body);
+        const validationResult = profileSchema.safeParse(req.body);
 
-        if (!parsedData.success) {
-            return res.status(400).json({ message: "Invalid request data", errors: parsedData.error.format()});
+        if (!validationResult.success) {
+            return res.status(400).json({
+                message: "Invalid request data",
+                errors: validationResult.error.format()
+            });
         }
 
-        const { gender, hobbies, description, yearBorn, sexualOrientation, photos } = parsedData.data;
+        const {
+            preferredName,
+            gender,
+            hobbies,
+            description,
+            yearBorn,
+            sexualOrientation,
+            photos
+        } = validationResult.data;
 
+        // Check if profile exists
         const existingProfile = await prisma.profile.findUnique({ where: { userId } });
 
         if (existingProfile) {
+            // Update existing profile
             const updatedProfile = await prisma.profile.update({
                 where: { userId },
-                data: { gender, hobbies, description, yearBorn, sexualOrientation, photos },
+                data: {
+                    preferredName,
+                    gender,
+                    hobbies,
+                    description,
+                    yearBorn,
+                    sexualOrientation,
+                    photos
+                },
             });
             return res.status(200).json(updatedProfile);
         } else {
+            // Create new profile
             const newProfile = await prisma.profile.create({
-                data: { userId, gender, hobbies, description, yearBorn, sexualOrientation, photos },
+                data: {
+                    userId,
+                    preferredName,
+                    gender,
+                    hobbies: hobbies || [],
+                    description,
+                    yearBorn,
+                    sexualOrientation,
+                    photos: photos || []
+                },
             });
             return res.status(201).json(newProfile);
         }
