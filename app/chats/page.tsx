@@ -80,7 +80,7 @@ const ChatPage = () => {
                             <Plus className="w-9 h-9 text-gray-500 mr-2 cursor-pointer" />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="start" side="top">
-                            <DropdownMenuItem className="text-lg py-2" onClick={() => handleNavigation('/study-buddy-mode')}>📚 Study Buddy Mode</DropdownMenuItem>
+                            <DropdownMenuItem className="text-lg py-2" onClick={() => handleNavigation('/calendar')}>📚 Study Buddy Mode</DropdownMenuItem>
                             <DropdownMenuItem className="text-lg py-2" onClick={() => handleNavigation('/campus-social-events')}>🏫 Campus Social Events</DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
