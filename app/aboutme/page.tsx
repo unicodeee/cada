@@ -12,7 +12,6 @@ export default function AboutPage() {
 
             {/* Grid layout */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-20 max-w-screen-2xl w-full mx-auto px-16 py-20">
-npm
                 {/* Left Side */}
                 <div>
                     <h2 className="text-3xl font-bold mb-3">Discover like-minded people 🫂</h2>
