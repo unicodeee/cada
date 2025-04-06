@@ -2,65 +2,23 @@
 import { ReactNode } from "react";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import "@/app/globals.css";
-import { SessionProvider, useSession } from "next-auth/react";
-import ThemeToggler from "@components/ui/theme-toggler";
+import { SessionProvider } from "next-auth/react";
 import * as React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import {
   NavigationMenu,
-  NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import ListItem from "@components/list-items";
-import { Icons } from "@components/ui/icons";
 
-const components = [
-  {
-    title: "Alert Dialog",
-    href: "/docs/primitives/alert-dialog",
-    description:
-      "A modal dialog that interrupts the user with important content and expects a response.",
-  },
-  {
-    title: "Hover Card",
-    href: "/docs/primitives/hover-card",
-    description:
-      "For sighted users to preview content available behind a link.",
-  },
-  {
-    title: "Progress",
-    href: "/docs/primitives/progress",
-    description:
-      "Displays an indicator showing the completion progress of a task.",
-  },
-  {
-    title: "Scroll-area",
-    href: "/docs/primitives/scroll-area",
-    description: "Visually or semantically separates content.",
-  },
-  {
-    title: "Tabs",
-    href: "/docs/primitives/tabs",
-    description: "A set of layered sections of content—known as tab panels.",
-  },
-  {
-    title: "Tooltip",
-    href: "/docs/primitives/tooltip",
-    description: "A popup that displays information related to an element.",
-  },
-];
 
 interface RootLayoutProps {
   children: ReactNode;
 }
 
 export default function RootLayout({ children }: RootLayoutProps) {
-  const pathname = usePathname();
   return (
     <>
       <html lang="en" suppressHydrationWarning>
@@ -140,34 +98,6 @@ export default function RootLayout({ children }: RootLayoutProps) {
           </SessionProvider>
         </body>
       </html>
-    </>
-  );
-}
-
-// Extract navigation logic into a separate component
-function AuthNavigation() {
-  const { data: session } = useSession(); // Get session data
-
-  return (
-    <>
-      {session && (
-        <NavigationMenu>
-          <NavigationMenuList>
-            {/* Conditionally show Profile link if user is logged in */}
-            <NavigationMenuItem>
-              <Link href="/profile" legacyBehavior passHref>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  Profile
-                </NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
-
-            <NavigationMenuItem>
-              <ThemeToggler />
-            </NavigationMenuItem>
-          </NavigationMenuList>
-        </NavigationMenu>
-      )}
     </>
   );
 }

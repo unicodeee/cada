@@ -7,16 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { X, Heart } from "lucide-react";
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuList,
-  NavigationMenuLink,
-} from "@/components/ui/navigation-menu";
-
-import Link from "next/link";
-import { cn } from "@/lib/utils"; // Only if you need custom class merging
-import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu"; // Import the missing function
+import Image from 'next/image';
 
 const users = [
   {
@@ -87,7 +78,13 @@ export default function MessagesPage() {
         <div className="w-full max-w-md">
           {/* Heart Icon + Andrew */}
           <div className="items-center gap-2 mb-2">
-            <img src="/cada_heart.png" alt="Heart" className="w-12 h-12" />
+            <Image
+              src="/cada_heart.png"
+              alt="Heart"
+              width={48}
+              height={48}
+              className="w-12 h-12"
+            />
           </div>
           <div className="flex items-center gap-4 mb-4">
             <Avatar>
@@ -150,9 +147,11 @@ export default function MessagesPage() {
         {/* Right Side: Profile Card */}
         <div className="w-full max-w-md flex justify-center items-start mt-14">
           <div className="relative w-[350px] h-[550px] rounded-2xl overflow-hidden shadow-xl bg-black centered">
-            <img
-              src="https://plus.unsplash.com/premium_photo-1690407617542-2f210cf20d7e?q=80&w=2417&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+            <Image
+              src="/random-girl.jpeg"
               alt={profile.name}
+              width={350}
+              height={550}
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
