@@ -52,6 +52,8 @@ model Profile {
   hobbies           String[]
   description       String?
   yearBorn          Int?
+  dayBorn           Int?
+  monthBorn         Int?
   sexualOrientation SexualOrientation?
   photos            String[]
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
