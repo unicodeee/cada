@@ -12,6 +12,8 @@ import { z } from "zod"
 // });
 
 
+const CURRENTYEAR = new Date().getFullYear();
+
 // Enum validation for Gender
 const GenderEnum = z.enum([
     "male",
@@ -35,11 +37,19 @@ const SexualOrientationEnum = z.enum([
 
 // Profile schema validation
 export const profileSchema = z.object({
-    // userId: z.string().uuid(),
     gender: GenderEnum.optional(),
     hobbies: z.array(z.string()).optional(),
     description: z.string().optional(),
-    yearBorn: z.number().int().min(1900).max(new Date().getFullYear()).optional(),
+    yearBorn: z.number().int().min(CURRENTYEAR - 100).max(CURRENTYEAR).optional(),
     sexualOrientation: SexualOrientationEnum.optional(),
     photos: z.array(z.string()).optional(),
+});
+
+// Define the Zod schema for the file structure
+export const formidableFileSchema = z.object({
+    originalFilename: z.string(),
+    filepath: z.string(),
+    mimetype: z.string(),
+    size: z.number(),
+    // Add any other properties you expect the file to have
 });
