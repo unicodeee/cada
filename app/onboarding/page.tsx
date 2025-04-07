@@ -7,6 +7,7 @@ import React from "react";
 
 const Onboarding = () => {
     return (
+        <main className="flex flex-row justify-center items-start gap-20 px-6 py-8 w-full max-w-6xl mx-auto flex-grow">
         <div className="min-h-screen bg-white flex flex-col items-center justify-start p-8 overflow-y-auto">
             {/* Heart Progress */}
             <div className="mb-12 text-center">
@@ -85,6 +86,7 @@ const Onboarding = () => {
                 </button>
             </div>
         </div>
+        </main>
     );
 };
 

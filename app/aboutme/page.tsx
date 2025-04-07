@@ -4,6 +4,7 @@ import React from "react";
 
 export default function AboutPage() {
     return (
+        <main className="flex flex-row justify-center items-start gap-20 px-6 py-8 w-full max-w-6xl mx-auto flex-grow">
         <div className="min-h-screen bg-white px-6 py-10">
             {/* Header */}
             <div className="flex flex-col items-center mb-10">
@@ -58,5 +59,6 @@ export default function AboutPage() {
                 </button>
             </div>
         </div>
+        </main>
     );
 }
