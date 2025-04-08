@@ -3,7 +3,7 @@ import * as React from "react";
 import {ReactNode} from "react";
 import {ThemeProvider} from "@/components/ui/theme-provider";
 import "@/app/globals.css";
-import {SessionProvider, useSession} from "next-auth/react";
+import { SessionProvider, useSession } from "next-auth/react";
 import Link from "next/link";
 import {
     NavigationMenu,
@@ -97,6 +97,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         </>
     );
 }
+
 
 function ApplyLoadingStateForPage({ children }: { children: React.ReactNode }) {
     const { status } = useSession();
