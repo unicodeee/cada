@@ -77,7 +77,20 @@ export const authOptions: NextAuthOptions = {
             }
             return token;
         },
-        async session({session}) {
+
+        async session({session, token}) {
+            if (token?.email) {
+                const userInDb = await prisma.user.findUnique({
+                    where: { email: token.email }
+                });
+
+                if (userInDb) {
+                    session.user.userId = userInDb.id;
+                }
+            } else {
+                console.error("Token is missing email");
+            }
+
             return session;
         },
     },

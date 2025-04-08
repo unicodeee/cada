@@ -48,6 +48,7 @@ model Profile {
   userId            String             @unique @db.Uuid
   preferredName     String?
   gender            Gender?
+  major             String?
   hobbies           String[]
   description       String?
   yearBorn          Int?

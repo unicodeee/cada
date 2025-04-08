@@ -43,6 +43,9 @@ export default function CardWithForm() {
                 email={session.user?.email || "No email"}
                 image={session.user?.image || undefined}
             />
+
+
+
         </div>
     );
 
