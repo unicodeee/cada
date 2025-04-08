@@ -4,7 +4,7 @@ import React, { useState, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Button } from '@/components/ui/button';
+import { Button1 } from '@/components/ui/button';
 import { X, Plus } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 
@@ -45,7 +45,7 @@ export default function PhotoUploadPage() {
         const newPhotos = [...photos];
         // Release the object URL to prevent memory leaks
         URL.revokeObjectURL(newPhotos[index].preview);
-        newPhotos.splice(index, 1); // Fixed: This was removing incorrectly before
+        newPhotos.splice(index, 1);
         setPhotos(newPhotos);
     };
 
@@ -132,6 +132,7 @@ export default function PhotoUploadPage() {
     };
 
     return (
+        <main className="flex flex-row justify-center items-start gap-20 px-6 py-8 w-full max-w-6xl mx-auto flex-grow">
         <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
             {/* Header */}
             <div className="py-4 px-4 text-center border-b bg-white dark:bg-gray-800">
@@ -203,15 +204,16 @@ export default function PhotoUploadPage() {
             {/* Footer with buttons */}
             <div className="p-4 border-t bg-white dark:bg-gray-800">
                 <div className="max-w-md mx-auto">
-                    <Button
+                    <Button1
                         onClick={handleSubmit}
-                        className="w-full bg-purple-600 hover:bg-purple-700"
+                        className="w-full text-lg font-semibold py-3"
                         disabled={uploading}
                     >
-                        {uploading ? "Uploading..." : "Continue"}
-                    </Button>
+                        {uploading ? "Uploading..." : "Continue (3/3)"}
+                    </Button1>
                 </div>
             </div>
         </div>
+        </main>
     );
 }

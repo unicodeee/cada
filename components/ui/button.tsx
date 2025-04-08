@@ -24,6 +24,10 @@ const buttonVariants = cva(
                     "bg-purple-600 text-white shadow hover:bg-purple-700",
                 white:
                     "bg-white text-gray-800 border border-gray-300 shadow-sm hover:bg-gray-100",
+                hobby:
+                    "px-4 py-2 rounded-full border transition-colors bg-white text-gray-800 border-gray-300 hover:border-purple-300",
+                hobbySelected:
+                    "px-4 py-2 rounded-full border transition-colors bg-purple-600 text-white border-purple-600",
             },
             size: {
                 default: "h-9 px-4 py-2",
@@ -70,4 +74,20 @@ const Button2 = React.forwardRef<HTMLButtonElement, Omit<ButtonProps, 'variant'>
 )
 Button2.displayName = "Button2"
 
-export { Button, Button1, Button2, buttonVariants }
+// Hobby selection button that handles selected/unselected state
+interface Button3Props extends Omit<ButtonProps, 'variant'> {
+    isSelected?: boolean;
+}
+
+const Button3 = React.forwardRef<HTMLButtonElement, Button3Props>(
+    ({ isSelected = false, ...props }, ref) => (
+        <Button
+            variant={isSelected ? "hobbySelected" : "hobby"}
+            {...props}
+            ref={ref}
+        />
+    )
+)
+Button3.displayName = "Button3"
+
+export { Button, Button1, Button2, Button3, buttonVariants }
