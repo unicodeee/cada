@@ -86,6 +86,21 @@ export default function RootLayout({ children }: RootLayoutProps) {
                                     </NavigationMenuItem>
                                 </NavigationMenuList>
                             </NavigationMenu>
+
+                            {/* Images */}
+                            <NavigationMenu>
+                                <NavigationMenuList>
+                                    <NavigationMenuItem>
+                                        <Link href="/images" legacyBehavior passHref>
+                                            <NavigationMenuLink
+                                                className={navigationMenuTriggerStyle()}
+                                            >
+                                                Images
+                                            </NavigationMenuLink>
+                                        </Link>
+                                    </NavigationMenuItem>
+                                </NavigationMenuList>
+                            </NavigationMenu>
                         </footer>
                         {children}
                     </ApplyLoadingStateForPage>
