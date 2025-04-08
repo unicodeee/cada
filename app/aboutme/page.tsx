@@ -295,7 +295,7 @@ export default function AboutPage() {
 
             // Navigate to the photo upload page
             console.log("Navigating to photo page...");
-            router.push('/photo');
+            router.push('/');
 
         } catch (error) {
             console.error('Error updating profile:', error);
