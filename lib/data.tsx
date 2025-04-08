@@ -26,7 +26,25 @@ export const allGenders = () => {
         transWoman: "Trans Woman"
     };
 };
-
+export const allHobbies=()=>{
+    return{
+        travel:"Travel",
+        cooking:"Cooking",
+        gaming: "Gaming",
+        movies: "Movies",
+        photography: "Photography",
+        technology: "Technology",
+        art: "Art",
+        yoga: "Yoga",
+        music: "Music",
+        fitness: "Fitness",
+        fashion: "Fashion",
+        hiking: "Hiking",
+        pets: "Pets",
+        reading: "Reading",
+        dancing: "dancing",
+    };
+};
 export const allYearsBorn = () => {
     const currentYear: number = new Date().getFullYear();
     const startYear = currentYear - 50;

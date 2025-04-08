@@ -1,15 +1,16 @@
 
 "use client"
-import React from "react";
+import React, {useState} from "react";
 import {useSession} from "next-auth/react";
 import {Label} from "@components/ui/label";
 import {Input} from "@components/ui/input";
-import {Button} from "@components/ui/button";
+import {Button1, Button2} from "@components/ui/button";
 import {allGenders, allSexualOrientations} from "@lib/data";
 import Link from "next/link";
+import {useRouter} from "next/navigation";
 
 export default function Onboarding(){
-    const {data: session } = useSession();
+    const { data: session } = useSession();
     return (
         <main className="flex flex-row justify-center items-start gap-20 px-6 py-8 w-full max-w-6xl mx-auto flex-grow">
         <div className="min-h-screen bg-white flex flex-col items-center justify-start p-8 overflow-y-auto">
@@ -42,7 +43,7 @@ export default function Onboarding(){
                         </p>
                         <div className="flex flex-col gap-4">
                             {Object.entries(allGenders()).map(([key, value]) => (
-                            <Button key={key} value={key}>{value}</Button>
+                            <Button2 key={key} value={key}>{value}</Button2>
                             ))}
                         </div>
                     </div>
@@ -68,7 +69,7 @@ export default function Onboarding(){
                         <h2 className="text-2xl font-bold mb-4">Sexual Orientation</h2>
                         <div className="flex flex-col gap-4">
                             {Object.entries(allSexualOrientations()).map(([key, value]) => (
-                                <Button key={key} value={key}>{value}</Button>
+                                <Button2 key={key} value={key}>{value}</Button2>
                             ))}
                         </div>
                         </div>
@@ -78,9 +79,9 @@ export default function Onboarding(){
             {/* Continue Button */}
             <div className="mt-20 w-full max-w-md">
                 <Link href="/aboutme">
-                <Button className="w-full bg-purple-600 text-white rounded-full py-3 font-semibold">
+                <Button2 className="w-full bg-purple-600 text-white rounded-full py-3 font-semibold">
                     Continue
-                </Button>
+                </Button2>
                 </Link>
             </div>
         </div>

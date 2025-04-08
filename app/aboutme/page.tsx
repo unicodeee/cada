@@ -1,6 +1,10 @@
 // pages/profile/about.tsx
 "use client"
 import React from "react";
+import {Input} from "@components/ui/input";
+import {allGenders, allHobbies} from "@lib/data";
+import {Button1, Button2} from "@components/ui/button";
+
 
 export default function AboutPage() {
     return (
@@ -21,23 +25,15 @@ export default function AboutPage() {
                         enthusiasm.
                     </p>
 
-                    <input
+                    <Input
                         type="text"
                         placeholder="🔍 Search interest"
                         className="w-full p-4 text-lg border rounded-xl mb-6"
                     />
 
                     <div className="flex flex-wrap gap-3 max-h-72 overflow-y-auto">
-                        {[
-                            "Travel", "Cooking", "Gaming", "Movies", "Photography", "Technology", "Art", "Yoga", "Music", "Fitness",
-                            "Fashion", "Hiking", "Pets", "Painting", "Reading", "Dancing"
-                        ].map((interest, index) => (
-                            <span
-                                key={index}
-                                className="bg-gray-100 px-4 py-2 rounded-full text-base hover:bg-purple-100 cursor-pointer"
-                            >
-                {interest}
-              </span>
+                        {Object.entries(allHobbies()).map(([key, value]) => (
+                            <Button1 key={key} value={key}>{value}</Button1>
                         ))}
                     </div>
                 </div>
