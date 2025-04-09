@@ -65,15 +65,15 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
         useDropzone({
             onDrop,
             maxFiles: 1,
-            maxSize: 1000000,
+            maxSize: 6 * 1024 * 1024, // 6 MB
             accept: {"image/png": [], "image/jpg": [], "image/jpeg": []},
         });
 
-    const onSubmit = (values: z.infer<typeof formSchema>) => {
-        console.log("file data", values);
-        console.log("file img", values.image);
-        toast.success(`Image uploaded successfully 🎉 ${values.image.name}`);
-    };
+    // const onSubmit = (values: z.infer<typeof formSchema>) => {
+    //     console.log("file data", values);
+    //     console.log("file img", values.image);
+    //     toast.success(`Image uploaded successfully 🎉 ${values.image.name}`);
+    // };
 
 
     return (
@@ -127,9 +127,9 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                             </FormControl>
                             <FormMessage>
                                 {fileRejections.length !== 0 && (
-                                    <p className="text-xs text-red-500">
+                                    <span className="text-xs text-red-500">
                                         Image must be less than 1MB and of type png, jpg, or jpeg
-                                    </p>
+                                    </span>
                                 )}
                             </FormMessage>
                         </FormItem>
