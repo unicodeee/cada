@@ -1,74 +1,89 @@
 "use client";
 import * as React from "react";
-import {FormEvent} from "react";
-import {ImageUploader} from "@components/ui/image-uploader";
-import {Button} from "@/components/ui/button";
-import {toast} from "sonner";
-import {GetSignedUrl, getUserIdByEmail} from "@lib/actions";
-import {useSession} from "next-auth/react";
+import { FormEvent, useEffect, useState } from "react";
+import { ImageUploader } from "@components/ui/image-uploader";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { getSignedUrl, getUserIdByEmail, getImageUrl } from "@lib/actions";
+import { useSession } from "next-auth/react";
 
 export default function ImageUploadPage() {
-    const [images, setImages] = React.useState<(File | null)[]>(Array(6).fill(null));
+    const [images, setImages] = useState<(File | null)[]>(Array(6).fill(null));
+    const [previewUrls, setPreviewUrls] = useState<(string | null)[]>(Array(6).fill(null));
 
-    const {data: session} = useSession();
+    const { data: session } = useSession();
+
+    useEffect(() => {
+        const loadImages = async () => {
+            if (!session?.user?.email) return;
+            try {
+                const userId = await getUserIdByEmail(session.user.email);
+                const urls = await Promise.all(
+                    Array(6).fill(null).map((_, index) =>
+                        getImageUrl(`${userId}/${index}`).catch(() => null) // catch if file doesn't exist
+                    )
+                );
+                setPreviewUrls(urls);
+            } catch (error) {
+                console.error("Error loading image URLs", error);
+            }
+        };
+
+        loadImages();
+    }, [session]);
 
     const handleFileUpload = (file: File, index: number) => {
-
-        // Update our images array with the new file
         setImages(prev => {
             const newImages = [...prev];
             newImages[index] = file;
             return newImages;
         });
+
+        // Immediately update preview for UX
+        setPreviewUrls(prev => {
+            const newPreviews = [...prev];
+            newPreviews[index] = URL.createObjectURL(file);
+            return newPreviews;
+        });
     };
 
-
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-        // Filter out null entries before submitting
-        event.preventDefault()
+        event.preventDefault();
 
-        const filesToSubmit = images.filter(img => img !== null);
-
-        if (filesToSubmit.length === 0) {
-            toast.error("Please upload at least one image before submitting");
-            return;
-        }
-        const filesToUpload = images.filter((img): img is File => img !== null);
+        const filesToUpload = images.map((img, idx) => ({ file: img, index: idx })).filter(({ file }) => file !== null) as { file: File, index: number }[];
 
         if (filesToUpload.length === 0) {
             toast.error("No images to upload!");
             return;
         }
 
-
-        for (const image of filesToUpload) {
-            const index = filesToUpload.indexOf(image);
+        for (const { file, index } of filesToUpload) {
             try {
                 const userId = await getUserIdByEmail(session!.user.email!);
-                // upload to gcs
-                const url = await GetSignedUrl(`${userId}/${index}`, image.type);
+                const url = await getSignedUrl(`${userId}/${index}`, file.type);
 
                 const response = await fetch(url, {
                     method: 'PUT',
-                    body: image,
+                    body: file,
                     headers: {
-                        'Content-Type': image.type
+                        'Content-Type': file.type
                     },
+                });
 
-                })
-                toast.info(response.toString());
-
+                if (response.ok) {
+                    toast.success(`Image ${index} uploaded!`);
+                } else {
+                    toast.error(`Failed to upload image: ${index}`);
+                }
             } catch (error) {
-                toast.error(`Failed to upload image: index${index}`);
-                console.error("Error uploading file:", error);
+                toast.error(`Upload error: index ${index}`);
+                console.error("Upload error", error);
             }
-
         }
     };
 
     return (
-        <div
-            className="flex flex-col items-center justify-center min-h-screen p-8 pb-20 gap-8 sm:p-20 bg-gray-50 dark:bg-gray-900">
+        <div className="flex flex-col items-center justify-center min-h-screen p-8 pb-20 gap-8 sm:p-20 bg-gray-50 dark:bg-gray-900">
             <main className="flex flex-col gap-6 items-center">
                 <form onSubmit={handleSubmit}>
                     <h1 className="text-3xl font-bold">Upload your profile pictures</h1>
@@ -79,6 +94,7 @@ export default function ImageUploadPage() {
                                 onUpload={(file) => handleFileUpload(file, index)}
                                 hideLabel={true}
                                 hideSubmitButton={true}
+                                preloadedImage={previewUrls[index]}
                             />
                         ))}
                     </div>
@@ -90,6 +106,3 @@ export default function ImageUploadPage() {
         </div>
     );
 }
-
-
-

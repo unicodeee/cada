@@ -11,8 +11,6 @@ export default function CardWithForm() {
 
     const { data: session, status } = useSession();
 
-
-
     if (status === "loading") {
         return (
             <div className="flex items-center justify-center min-h-screen">

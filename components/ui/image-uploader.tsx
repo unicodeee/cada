@@ -16,12 +16,14 @@ interface ImageUploaderProps {
     onUpload?: (file: File) => void;
     hideLabel?: boolean;
     hideSubmitButton?: boolean;
+    preloadedImage?: string | null;
 }
 
 export const ImageUploader: React.FC<ImageUploaderProps> = ({
                                                                 onUpload,
                                                                 hideLabel = false,
-                                                                hideSubmitButton = false
+                                                                hideSubmitButton = false,
+                                                                preloadedImage = null,
                                                             }) => {
     const [preview, setPreview] = React.useState<string | ArrayBuffer | null>("");
 
@@ -103,9 +105,9 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                                     >
                                         <div
                                             className="relative flex h-32 w-32 items-center justify-center overflow-hidden rounded-lg border bg-gray-100">
-                                            {preview ? (
+                                            {preview || preloadedImage ? (
                                                 <Image
-                                                    src={preview as string}
+                                                    src={(preview as string) || preloadedImage!}
                                                     alt="Uploaded image"
                                                     layout="fill"
                                                     objectFit="cover"
@@ -113,6 +115,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                                             ) : (
                                                 <ImagePlus className="size-20 text-gray-400"/>
                                             )}
+
                                         </div>
                                         <Input {...getInputProps()} type="file" className="hidden"/>
                                         {isDragActive ? (

@@ -2,6 +2,7 @@
 
 module.exports = {
     images: {
+        domains: ['storage.googleapis.com'],
         remotePatterns: [
             {
                 protocol: 'https',
@@ -9,7 +10,7 @@ module.exports = {
                 port: '',
                 pathname: '/**',
                 search: '',
-            },
+            }
         ],
     },
 }
