@@ -18,6 +18,7 @@ export const authOptions: NextAuthOptions = {
     ],
     secret: process.env.NEXTAUTH_SECRET,
     callbacks: {
+        // this run first
         async signIn({user, profile}) {
             // Check if the profile email exists
 
@@ -55,6 +56,7 @@ export const authOptions: NextAuthOptions = {
 
             return true; // Allow sign-in
         },
+        // this run 2nd
         async jwt({token, account, profile}) {
             if (account) {
                 token.accessToken = account.access_token;
@@ -77,10 +79,13 @@ export const authOptions: NextAuthOptions = {
             }
             return token;
         },
-
-        async session({session}) {
+        // this run last
+        async session({ session, token }) {
+            if (token && session.user) {
+                session.user.userId = token.userId as string;
+            }
             return session;
-        },
+        }
     },
     pages: {
         signIn: '/',

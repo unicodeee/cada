@@ -14,7 +14,7 @@ export default async function handler(
         return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    const userId = req.query.id as string;
+    const userId = session.user.userId as string;
 
     try {
         // Get user with related data
@@ -31,7 +31,6 @@ export default async function handler(
                         gender: true,
                         hobbies: true,
                         description: true,
-                        yearBorn: true,
                         sexualOrientation: true,
                         photos: true,
                     },
