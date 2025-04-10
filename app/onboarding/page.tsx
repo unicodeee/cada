@@ -62,10 +62,11 @@ export default function Onboarding(){
                         sexualOrientation: profileData.sexualOrientation || ""
                     });
                 } else {
-                    // If 404, it's a new user without a profile yet
+                    // If 404, it's a new user without a profile yet - this is normal
                     if (response.status !== 404) {
-                        const errorData = await response.json().catch(() => ({}));
-                        console.error("Profile fetch error:", errorData);
+                        // Only log as error for non-404 responses
+                        console.warn("Profile fetch warning:", response.status);
+                        // Don't try to parse JSON for error responses
                     }
                 }
             } catch (error) {
@@ -223,10 +224,10 @@ export default function Onboarding(){
             const profileData = {
                 preferredName: formData.preferredName,
                 gender: formData.gender,
-                dayBorn: formData.dayBorn ? parseInt(formData.dayBorn) : undefined,
-                monthBorn: formData.monthBorn ? parseInt(formData.monthBorn) : undefined,
-                yearBorn: formData.yearBorn ? parseInt(formData.yearBorn) : undefined,
-                sexualOrientation: formData.sexualOrientation || undefined,
+                dayBorn: formData.dayBorn ? parseInt(formData.dayBorn) : null,
+                monthBorn: formData.monthBorn ? parseInt(formData.monthBorn) : null,
+                yearBorn: formData.yearBorn ? parseInt(formData.yearBorn) : null,
+                sexualOrientation: formData.sexualOrientation || null,
                 hobbies: [], // Will be filled on the about page
                 photos: []  // Will be handled separately
             };
@@ -242,17 +243,29 @@ export default function Onboarding(){
                 body: JSON.stringify(profileData),
             });
 
-            let responseData;
-            try {
-                responseData = await response.json();
-                console.log("Response data:", responseData);
-            } catch (error) {
-                console.error("Error parsing response:", error);
+            // Check response status first
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error("API Error Response:", response.status, errorText);
+
+                let errorMessage = "Failed to save profile";
+                try {
+                    // Try to parse error as JSON, but don't rely on it
+                    const errorData = JSON.parse(errorText);
+                    if (errorData?.message) {
+                        errorMessage = errorData.message;
+                    }
+                } catch (e) {
+                    // If parsing fails, use status text
+                    errorMessage = `Server error: ${response.statusText || response.status}`;
+                }
+
+                throw new Error(errorMessage);
             }
 
-            if (!response.ok) {
-                throw new Error(responseData?.message || "Failed to save profile");
-            }
+            // If response is OK, then parse JSON
+            const responseData = await response.json();
+            console.log("Response data:", responseData);
 
             toast({
                 title: "Success",

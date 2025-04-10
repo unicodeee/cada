@@ -42,7 +42,7 @@ export const allHobbies=()=>{
         hiking: "Hiking",
         pets: "Pets",
         reading: "Reading",
-        dancing: "dancing",
+        dancing: "Dancing",
     };
 };
 export const allYearsBorn = () => {

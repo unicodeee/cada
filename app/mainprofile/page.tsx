@@ -17,6 +17,14 @@ interface ProfileData {
     photos: string[];
 }
 
+// Define steps in the profile creation process
+const PROFILE_STEPS = {
+    BASIC_INFO: 'onboarding',  // Name, gender, orientation, year
+    ABOUT_ME: 'aboutme',       // Hobbies and bio
+    PHOTOS: 'images',          // Profile pictures
+    COMPLETE: 'mainprofile'    // Complete profile
+};
+
 export default function ProfilePage() {
     const { data: session, status } = useSession();
     const router = useRouter();
@@ -25,6 +33,7 @@ export default function ProfilePage() {
     const [profile, setProfile] = useState<ProfileData | null>(null);
     const [loading, setLoading] = useState(true);
     const [imageUrls, setImageUrls] = useState<string[]>([]);
+    const [redirecting, setRedirecting] = useState(false);
 
     // Get user identifier - try email if userId not available
     const getUserId = () => {
@@ -39,7 +48,39 @@ export default function ProfilePage() {
         return currentYear - yearBorn;
     };
 
-    // Fetch profile data
+    // Determine which step of the profile creation process the user needs to complete
+    const determineProfileStep = (profileData: ProfileData | null): string => {
+        if (!profileData) {
+            return PROFILE_STEPS.BASIC_INFO; // Start with basic info if no profile exists
+        }
+
+        // Check for basic info (step 1)
+        const hasBasicInfo = profileData.preferredName &&
+            profileData.gender &&
+            profileData.yearBorn;
+        if (!hasBasicInfo) {
+            return PROFILE_STEPS.BASIC_INFO;
+        }
+
+        // Check for about me info (step 2)
+        const hasAboutInfo = profileData.description &&
+            profileData.hobbies &&
+            profileData.hobbies.length > 0;
+        if (!hasAboutInfo) {
+            return PROFILE_STEPS.ABOUT_ME;
+        }
+
+        // Check for photos (step 3)
+        const hasPhotos = profileData.photos && profileData.photos.length > 0;
+        if (!hasPhotos) {
+            return PROFILE_STEPS.PHOTOS;
+        }
+
+        // If all steps are completed
+        return PROFILE_STEPS.COMPLETE;
+    };
+
+    // Fetch profile data and redirect if necessary
     useEffect(() => {
         const fetchProfileData = async () => {
             if (status !== "authenticated") {
@@ -61,11 +102,26 @@ export default function ProfilePage() {
                     const profileData = await response.json();
                     setProfile(profileData);
 
-                    // Check if profile is complete
-                    const requiredFields = ['preferredName', 'gender', 'description', 'yearBorn'];
-                    const hasRequiredFields = requiredFields.every(field => !!profileData[field]);
+                    // Determine which profile step the user should be on
+                    const nextStep = determineProfileStep(profileData);
 
-                    setProfileComplete(hasRequiredFields);
+                    if (nextStep !== PROFILE_STEPS.COMPLETE && !redirecting) {
+                        setRedirecting(true);
+                        console.log(`Profile incomplete, redirecting to /${nextStep}`);
+                        router.push(`/${nextStep}`);
+                        return;
+                    }
+
+                    // If we get here, profile is complete
+                    setProfileComplete(true);
+                } else if (response.status === 404) {
+                    // No profile found, redirect to first step
+                    console.log("No profile found, redirecting to onboarding");
+                    if (!redirecting) {
+                        setRedirecting(true);
+                        router.push('/onboarding');
+                        return;
+                    }
                 } else {
                     console.error("Failed to fetch profile data");
                 }
@@ -77,12 +133,12 @@ export default function ProfilePage() {
         };
 
         fetchProfileData();
-    }, [status, session]);
+    }, [status, session, router, redirecting]);
 
     // Load images from Google Cloud
     useEffect(() => {
         const loadImagesFromCloud = async () => {
-            if (!session?.user?.email) return;
+            if (!session?.user?.email || !profile) return;
 
             try {
                 const userId = await getUserIdByEmail(session.user.email);
@@ -99,7 +155,7 @@ export default function ProfilePage() {
                 // Filter out any null values (images that couldn't be loaded)
                 const validUrls = urls.filter(url => url !== null) as string[];
 
-                // Update profile with these images
+                // Update state with these images
                 setImageUrls(validUrls);
 
                 if (profile) {
@@ -113,10 +169,10 @@ export default function ProfilePage() {
             }
         };
 
-        if (session?.user?.email) {
+        if (session?.user?.email && profile) {
             loadImagesFromCloud();
         }
-    }, [session, profile?.preferredName]); // Only run when profile is loaded
+    }, [session, profile]);
 
     // Navigate to next photo
     const nextPhoto = () => {
@@ -172,7 +228,7 @@ export default function ProfilePage() {
                 </div>
                 <button
                     className="px-4 py-2 bg-purple-600 text-white rounded-md"
-                    onClick={() => router.push('/profile/edit')}
+                    onClick={() => router.push('/onboarding')}
                 >
                     Create Profile
                 </button>
