@@ -24,9 +24,10 @@ CREATE TABLE "Profile" (
     "userId" UUID NOT NULL,
     "preferredName" TEXT,
     "gender" "Gender",
+    "major" TEXT,
     "hobbies" TEXT[],
     "description" TEXT,
-    "yearBorn" INTEGER,
+    "dateOfBirth" TIMESTAMP(3),
     "sexualOrientation" "SexualOrientation",
     "photos" TEXT[],
 
@@ -58,8 +59,8 @@ CREATE TABLE "Swipe" (
 -- CreateTable
 CREATE TABLE "Match" (
     "id" UUID NOT NULL,
-    "user1Id" UUID NOT NULL,
-    "user2Id" UUID NOT NULL,
+    "firstUserId" UUID NOT NULL,
+    "secondUserId" UUID NOT NULL,
     "dateCreated" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Match_pkey" PRIMARY KEY ("id")
@@ -127,7 +128,7 @@ CREATE UNIQUE INDEX "Preference_userId_key" ON "Preference"("userId");
 CREATE UNIQUE INDEX "Swipe_swiperId_swipedId_key" ON "Swipe"("swiperId", "swipedId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Match_user1Id_user2Id_key" ON "Match"("user1Id", "user2Id");
+CREATE UNIQUE INDEX "Match_firstUserId_secondUserId_key" ON "Match"("firstUserId", "secondUserId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "UnmatchCountdown_matchId_key" ON "UnmatchCountdown"("matchId");
@@ -145,10 +146,10 @@ ALTER TABLE "Swipe" ADD CONSTRAINT "Swipe_swiperId_fkey" FOREIGN KEY ("swiperId"
 ALTER TABLE "Swipe" ADD CONSTRAINT "Swipe_swipedId_fkey" FOREIGN KEY ("swipedId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Match" ADD CONSTRAINT "Match_user1Id_fkey" FOREIGN KEY ("user1Id") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Match" ADD CONSTRAINT "Match_firstUserId_fkey" FOREIGN KEY ("firstUserId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Match" ADD CONSTRAINT "Match_user2Id_fkey" FOREIGN KEY ("user2Id") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Match" ADD CONSTRAINT "Match_secondUserId_fkey" FOREIGN KEY ("secondUserId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "UnmatchCountdown" ADD CONSTRAINT "UnmatchCountdown_matchId_fkey" FOREIGN KEY ("matchId") REFERENCES "Match"("id") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -28,7 +28,7 @@ To spin up both the backend and the PostgreSQL database using Docker:
 
 3. Run Docker Compose to build and start both services (Next.js and PostgreSQL):
    ```bash
-   docker-compose up --build
+   docker-compose up --build -d
    ```
 
 This command will:
@@ -104,10 +104,53 @@ docker-compose down
   ```bash
   npx prisma migrate dev --name init
   ```
+  
+- Useful prisma commands:
 
-- Check Before push:
+```bash
+   npx prisma generate    # Generates Prisma Client from your schema
+   
+   npx prisma db push    # Pushes your schema to the database (non-destructive, no migrations)
+   
+   npx prisma migrate dev    # Runs migrations in dev environment (interactive, creates SQL files)
+   
+   npx prisma migrate reset    # Resets database and re-applies all migrations
+   
+   npx prisma studio      # See database
+````
+
+- Check Before commit/push:
   ```bash
+  
   npm run lint
   pnpm install
   pnpm run build
   ```
+
+-  List of useful Prisma CLI commands for working with your database, schema, and migrations:
+
+Setup & Initialization
+Command	Description
+
+  ```bash
+   npx prisma init	# Initializes Prisma in your project (prisma/ folder, .env file)
+   npx prisma generate	# Generates Prisma Client from your schema
+   npx prisma format	# Formats your schema.prisma file
+   npx prisma validate	# Validates your Prisma schema file
+  ```
+
+🧪 Development & Database Tools
+Command	Description
+
+  ```bash
+  npx prisma db push	# Pushes your schema to the database (non-destructive, no migrations)
+  npx prisma migrate dev	# Runs migrations in dev environment (interactive, creates SQL files)
+  npx prisma migrate reset	# Resets database and re-applies all migrations
+  npx prisma migrate status	# Shows migration status and history
+  npx prisma migrate deploy	# Applies all pending migrations in production
+  npx prisma migrate resolve	# Manually marks migrations as applied or rolled back
+  
+
+  ```
+
+

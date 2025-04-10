@@ -53,3 +53,10 @@ export const formidableFileSchema = z.object({
     size: z.number(),
     // Add any other properties you expect the file to have
 });
+
+
+export const swipeSchema = z.object({
+    swiperId: z.string().uuid(),
+    swipedId: z.string().uuid(),
+    swipeRight: z.boolean(),
+})

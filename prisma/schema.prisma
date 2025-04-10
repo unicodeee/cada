@@ -38,8 +38,8 @@ model User {
   swipingUsers  Swipe[]            @relation("Swiped")
   messages      Message[]
   studySessions UserStudySession[]
-  matches1      Match[]            @relation("User1")
-  matches2      Match[]            @relation("User2")
+  matches1      Match[]            @relation("firstUser")
+  matches2      Match[]            @relation("secondUser")
   studyGroups   StudySession[]
 }
 
@@ -51,9 +51,7 @@ model Profile {
   major             String?
   hobbies           String[]
   description       String?
-  yearBorn          Int?
-  dayBorn           Int?
-  monthBorn         Int?
+  dateOfBirth       DateTime?
   sexualOrientation SexualOrientation?
   photos            String[]
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -82,15 +80,15 @@ model Swipe {
 
 model Match {
   id               String            @id @default(uuid()) @db.Uuid
-  user1Id          String            @db.Uuid
-  user2Id          String            @db.Uuid
+  firstUserId      String            @db.Uuid
+  secondUserId     String            @db.Uuid
   dateCreated      DateTime          @default(now())
-  user1            User              @relation("User1", fields: [user1Id], references: [id], onDelete: Cascade)
-  user2            User              @relation("User2", fields: [user2Id], references: [id], onDelete: Cascade)
+  firstUser        User              @relation("firstUser", fields: [firstUserId], references: [id], onDelete: Cascade)
+  secondUser       User              @relation("secondUser", fields: [secondUserId], references: [id], onDelete: Cascade)
   messages         Message[]
   unmatchCountdown UnmatchCountdown?
 
-  @@unique([user1Id, user2Id])
+  @@unique([firstUserId, secondUserId])
 }
 
 model UnmatchCountdown {

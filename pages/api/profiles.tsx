@@ -7,7 +7,6 @@ import { getToken } from "next-auth/jwt";
 import {profileSchema} from "@lib/formdata";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    const session = await getServerSession(req, res, authOptions);
     const token = await getToken({ req });
     // Ensure token and user ID exist
     if (!token || !token.userId) {
