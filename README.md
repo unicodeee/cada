@@ -117,6 +117,8 @@ docker-compose down
    npx prisma migrate reset    # Resets database and re-applies all migrations
    
    npx prisma studio      # See database
+   
+   npx prisma db seed  # seed fake data into db
 ````
 
 - Check Before commit/push:
@@ -150,6 +152,8 @@ Command	Description
   npx prisma migrate deploy	# Applies all pending migrations in production
   npx prisma migrate resolve	# Manually marks migrations as applied or rolled back
   
+  npx prisma db seed  # seed fake data into db
+
 
   ```
 
