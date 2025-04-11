@@ -81,7 +81,7 @@ const ChatPage = () => {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="start" side="top">
                             <DropdownMenuItem className="text-lg py-2" onClick={() => handleNavigation('/calendar')}>📚 Study Buddy Mode</DropdownMenuItem>
-                            <DropdownMenuItem className="text-lg py-2" onClick={() => handleNavigation('/campus-social-events')}>🏫 Campus Social Events</DropdownMenuItem>
+                            <DropdownMenuItem className="text-lg py-2" onClick={() => handleNavigation('/eventpage')}>🏫 Campus Social Events</DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                     <Input
