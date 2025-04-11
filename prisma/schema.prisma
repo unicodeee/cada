@@ -33,7 +33,6 @@ model User {
   phone         String?
   avatar        String?
   profile       Profile?
-  preference    Preference?
   swipedUsers   Swipe[]            @relation("Swiper")
   swipingUsers  Swipe[]            @relation("Swiped")
   messages      Message[]
@@ -48,6 +47,7 @@ model Profile {
   userId            String             @unique @db.Uuid
   preferredName     String?
   gender            Gender?
+  genderPreference  Gender?
   major             String?
   hobbies           String[]
   description       String?
@@ -55,15 +55,6 @@ model Profile {
   sexualOrientation SexualOrientation?
   photos            String[]
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model Preference {
-  id               String  @id @default(uuid()) @db.Uuid
-  userId           String  @unique @db.Uuid
-  genderPreference String?
-  minAge           Int?
-  maxAge           Int?
-  user             User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Swipe {
