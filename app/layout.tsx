@@ -19,7 +19,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
             <SessionProvider>
                 <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
                     <ApplyLoadingStateForPage>
-                        <FooterNavigation />
+                        <AuthenticatedFooter />
                         {children}
                     </ApplyLoadingStateForPage>
                 </ThemeProvider>
@@ -28,6 +28,16 @@ export default function RootLayout({ children }: RootLayoutProps) {
             </html>
         </>
     );
+}
+
+function AuthenticatedFooter() {
+    const { status } = useSession();
+
+    if (status === "authenticated") {
+        return <FooterNavigation />;
+    }
+
+    return null;
 }
 
 function ApplyLoadingStateForPage({ children }: { children: React.ReactNode }) {

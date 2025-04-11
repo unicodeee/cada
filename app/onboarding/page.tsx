@@ -2,7 +2,7 @@
 import React, {useState, useEffect} from "react";
 import {useSession} from "next-auth/react";
 import {Label} from "@components/ui/label";
-import {Input} from "@components/ui/input";
+import {Input, LargeInput} from "@components/ui/input";
 import {Button1} from "@components/ui/button";
 import {allGenders, allSexualOrientations} from "@lib/data";
 import {useRouter} from "next/navigation";
@@ -318,8 +318,7 @@ export default function Onboarding(){
                                 Create a unique nickname that represents you. It's how others will know and remember you.
                             </p>
                             <div className="flex flex-col space-y-1.5">
-                                <Input
-                                    size="lg"
+                                <LargeInput
                                     id="preferredName"
                                     placeholder="Your preferred name"
                                     value={formData.preferredName}
@@ -380,8 +379,7 @@ export default function Onboarding(){
                                 Tell us your birthdate. Your profile doesn't display your birthdate, only your age.
                             </p>
                             <div className="flex gap-4">
-                                <Input
-                                    size="lg"
+                                <LargeInput
                                     id="dayBorn"
                                     placeholder="DD"
                                     value={formData.dayBorn}
@@ -389,8 +387,7 @@ export default function Onboarding(){
                                     maxLength={2}
                                     className={`text-center ${errors.birthday ? "border-red-500 focus:ring-red-500" : ""}`}
                                 />
-                                <Input
-                                    size="lg"
+                                <LargeInput
                                     id="monthBorn"
                                     placeholder="MM"
                                     value={formData.monthBorn}
@@ -398,8 +395,7 @@ export default function Onboarding(){
                                     maxLength={2}
                                     className={`text-center ${errors.birthday ? "border-red-500 focus:ring-red-500" : ""}`}
                                 />
-                                <Input
-                                    size="lg"
+                                <LargeInput
                                     id="yearBorn"
                                     placeholder="YYYY"
                                     value={formData.yearBorn}
