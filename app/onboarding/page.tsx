@@ -8,6 +8,7 @@ import {allGenders, allSexualOrientations} from "@lib/data";
 import {useRouter} from "next/navigation";
 import { toast } from "@/components/ui/use-toast";
 import { Heading, SectionHeading } from "@/components/ui/heading";
+import {date} from "zod";
 
 export default function Onboarding(){
     const { data: session, status } = useSession();
@@ -225,6 +226,7 @@ export default function Onboarding(){
                 preferredName: formData.preferredName,
                 gender: formData.gender,
                 sexualOrientation: formData.sexualOrientation || null,
+                dateOfBirth: `01/01/2000`,
                 hobbies: [], // Will be filled on the about page
                 photos: []  // Will be handled separately
             };
