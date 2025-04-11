@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getToken } from "next-auth/jwt";
-import { countObjectsInFolder } from "@lib/actions"; // Renamed from countImages
+import {countObjectsInFolder, getImgUrl} from "@lib/actions"; // Renamed from countImages
 
 export default async function handler(
     req: NextApiRequest,
@@ -22,7 +22,7 @@ export default async function handler(
 
     try {
         // Await the count operation since it's async
-        const count = await countObjectsInFolder(userId);
+        const count = await getImgUrl(`8d8c5509-9dab-4906-bcd1-cecfe233b62c/0`);
 
         return res.status(200).json({
             success: true,

@@ -32,10 +32,7 @@ export default function AboutPage() {
     });
 
     // Get user identifier
-    const getUserId = () => {
-        if (!session?.user) return null;
-        return session.user.userId || session.user.id || session.user.email;
-    };
+    const userId = session?.user.userId as string;
 
     // Fetch existing profile data when component mounts
     useEffect(() => {
@@ -213,7 +210,6 @@ export default function AboutPage() {
             return;
         }
 
-        const userId = getUserId();
         if (!userId) {
             toast({
                 title: "Error",
@@ -338,7 +334,6 @@ export default function AboutPage() {
 
                             <div className="flex gap-2 mb-6">
                                 <Input
-                                    size ="lg"
                                     type="text"
                                     placeholder="🔍 Search interest"
                                     className="w-full p-4 text-lg border rounded-xl"

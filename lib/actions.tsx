@@ -5,6 +5,18 @@ import process from "node:process";
 import {prisma} from "@/prisma/prisma";
 
 
+const storage = new Storage({
+    credentials: {
+        project_id: process.env.GC_PROJECT_ID,
+        private_key: process.env.GC_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+        client_email: process.env.GC_CLIENT_EMAIL,
+    },
+});
+
+const bucket = storage.bucket(process.env.GC_BUCKET!);
+
+
+
 export const getSignedUrl = async (fileName: string, fileType: string) => {
     // I am not including the key in the github repo, but this key goes in the root of the project.
     const storage = new Storage({
@@ -37,16 +49,6 @@ export const getSignedUrl = async (fileName: string, fileType: string) => {
 
 
 export const getImageUrl = async (fileName: string): Promise<string> => {
-    const storage = new Storage({
-        credentials: {
-            project_id: process.env.GC_PROJECT_ID,
-            private_key: process.env.GC_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-            client_email: process.env.GC_CLIENT_EMAIL,
-        },
-    });
-
-    const bucket = storage.bucket(process.env.GC_BUCKET!);
-
     const [url] = await bucket
         .file(fileName)
         .getSignedUrl({
@@ -57,6 +59,23 @@ export const getImageUrl = async (fileName: string): Promise<string> => {
 
     return url;
 };
+
+
+export const get6ImageUrls = async (userId: string) => {
+    const urls = [];
+    for (let i = 0; i < 6; i++) {
+        const [url] = await bucket
+            .file(`${userId}/${i}`)
+            .getSignedUrl({
+                action: "read", // CHANGE HERE: 'read' instead of 'write'
+                version: "v4",
+                expires: Date.now() + 15 * 60 * 1000, // 15 minutes
+            });
+        urls.push(url);
+    }
+    return urls;
+};
+
 
 
 export async function getUserIdByEmail(email: string) {

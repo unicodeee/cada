@@ -31,15 +31,9 @@ export default async function handler(
                         gender: true,
                         hobbies: true,
                         description: true,
+                        genderPreference: true,
                         sexualOrientation: true,
                         photos: true,
-                    },
-                },
-                preference: {
-                    select: {
-                        genderPreference: true,
-                        minAge: true,
-                        maxAge: true,
                     },
                 },
                 // Only include matches where the current user is involved
@@ -73,7 +67,7 @@ export default async function handler(
         });
 
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(404).json({ message: `User with id ${userId} not found` });
         }
 
         // Combine matches from both relations

@@ -46,6 +46,8 @@ async function getProfile(userId: string, res: NextApiResponse) {
 async function setProfile(userId: string, req: NextApiRequest, res: NextApiResponse) {
     try {
         // Validate request body
+
+        console.log("req.body: ", req.body);
         const validationResult = profileSchema.safeParse(req.body);
         if (!validationResult.success) {
             return res.status(400).json({ message: "Invalid profile data",
