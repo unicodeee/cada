@@ -8,7 +8,7 @@ interface ProfileData {
     preferredName?: string;
     gender?: string;
     sexualOrientation?: string;
-    yearBorn?: number;
+    dateOfBirth?: string;
     hobbies: string[];
     description?: string;
     photos: string[];
@@ -22,16 +22,13 @@ export default function ProfileRouter() {
     // Get user identifier
     const getUserId = () => {
         if (!session?.user) return null;
-        return session.user.userId || session.user.id || session.user.email;
+        return session.user.userId || session.user.email;
     };
 
     useEffect(() => {
         const routeToCorrectPage = async () => {
             // Handle non-authenticated users
-            if (status === "unauthenticated") {
-                router.push('/');
-                return;
-            }
+
 
             // Wait for session to load
             if (status === "loading") {
@@ -46,36 +43,36 @@ export default function ProfileRouter() {
             }
 
             try {
-                const response = await fetch(`/api/profile/${userId}`);
+                const response = await fetch(`/api/profile/`);
 
                 if (response.ok) {
                     // Profile exists, check if complete
                     const profileData: ProfileData = await response.json();
 
                     // Check step 1: Basic info
-                    if (!profileData.preferredName || !profileData.gender || !profileData.yearBorn) {
-                        router.push('/onboarding');
-                        return;
-                    }
+                    // if (!profileData.preferredName || !profileData.gender || !profileData.dateOfBirth) {
+                    //     router.push('/onboarding');
+                    //     return;
+                    // }
 
                     // Check step 2: About me
-                    if (!profileData.description || !profileData.hobbies || profileData.hobbies.length === 0) {
-                        router.push('/aboutme');
-                        return;
-                    }
-
-                    // Check step 3: Photos
-                    if (!profileData.photos || profileData.photos.length === 0) {
-                        router.push('/images');
-                        return;
-                    }
+                    // if (!profileData.description || !profileData.hobbies || profileData.hobbies.length === 0) {
+                    //     router.push('/aboutme');
+                    //     return;
+                    // }
+                    //
+                    // // Check step 3: Photos
+                    // if (!profileData.photos || profileData.photos.length === 0) {
+                    //     router.push('/images');
+                    //     return;
+                    // }
 
                     // Profile is complete
                     router.push('/mainprofile');
 
                 } else if (response.status === 404) {
                     // Profile doesn't exist, start at onboarding
-                    router.push('/onboarding');
+                    // router.push('/onboarding');
                 } else {
                     console.error("Failed to fetch profile data:", response.status);
                     // On error, just go to main profile page (will handle errors there)

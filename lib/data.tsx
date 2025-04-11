@@ -5,6 +5,15 @@
 // Asexual: Lack of sexual attraction to any gender
 // Queer: An umbrella term encompassing non-heterosexual identities
 
+export interface ProfileData {
+    preferredName?: string;
+    gender?: string;
+    sexualOrientation?: string;
+    hobbies: string[];
+    description?: string;
+    photos: string[];
+}
+
 export const allSexualOrientations = () => {
     return {
         heterosexual: "Heterosexual",
@@ -16,14 +25,32 @@ export const allSexualOrientations = () => {
     };
 };
 
+
+export const PROFILE_STEPS = {
+    BASIC_INFO: 'onboarding',  // Name, gender, orientation, year
+    ABOUT_ME: 'aboutme',       // Hobbies and bio
+    PHOTOS: 'images',          // Profile pictures
+    COMPLETE: 'mainprofile'    // Complete profile
+};
+
+export const PROFILE_STEPS2 = {
+    ON_BOARDING: 'onboarding',  // Name, gender, orientation, year
+    ABOUT_ME: 'aboutme',       // Hobbies and bio
+    IMAGES: 'images',          // Profile pictures
+};
+
+export const PROFILE_STEP_VALUES = Object.values(PROFILE_STEPS2); // ['onboarding', 'aboutme', 'images', 'mainprofile']
+
+
+
 export const allGenders = () => {
     return {
         male: "Male",
         female: "Female",
         gay: "Gay",
         lesbian: "Lesbian",
-        transMan: "Trans Man",
-        transWoman: "Trans Woman"
+        transman: "Trans Man",
+        transwoman: "Trans Woman"
     };
 };
 export const allHobbies=()=>{

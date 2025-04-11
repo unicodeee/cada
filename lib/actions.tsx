@@ -3,9 +3,6 @@
 import {Storage} from "@google-cloud/storage";
 import process from "node:process";
 import {prisma} from "@/prisma/prisma";
-import {getToken} from "next-auth/jwt";
-import {NextApiRequest, NextApiResponse} from "next";
-
 
 
 export const getSignedUrl = async (fileName: string, fileType: string) => {
@@ -71,3 +68,33 @@ export async function getUserIdByEmail(email: string) {
     return user.id;
 }
 
+
+export async function countObjectsInFolder(userId: string) {
+    const storage = new Storage({
+        credentials: {
+            project_id: process.env.GC_PROJECT_ID,
+            private_key: process.env.GC_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+            client_email: process.env.GC_CLIENT_EMAIL,
+        },
+    });
+
+    const bucket = storage.bucket(process.env.GC_BUCKET!);
+
+    try {
+        // List files in the folder named after userId
+        const [files] = await bucket.getFiles({
+            prefix: `${userId}/`,
+        });
+        //
+        // // Filter out the folder placeholder and any subfolder placeholders
+        // const objects = files.filter(file => {
+        //     // Exclude the folder itself and empty "directory markers"
+        //     return file.name !== `${userId}/` && !file.name.endsWith('/');
+        // });
+
+        return files.length;
+    } catch (error) {
+        console.error('Error counting objects in GCS folder:', error);
+        throw error;
+    }
+}

@@ -49,7 +49,7 @@ export default function Onboarding(){
             }
 
             try {
-                const response = await fetch(`/api/profile/${userId}`);
+                const response = await fetch(`/api/profiles/`);
 
                 if (response.ok) {
                     const profileData = await response.json();
@@ -224,9 +224,6 @@ export default function Onboarding(){
             const profileData = {
                 preferredName: formData.preferredName,
                 gender: formData.gender,
-                dayBorn: formData.dayBorn ? parseInt(formData.dayBorn) : null,
-                monthBorn: formData.monthBorn ? parseInt(formData.monthBorn) : null,
-                yearBorn: formData.yearBorn ? parseInt(formData.yearBorn) : null,
                 sexualOrientation: formData.sexualOrientation || null,
                 hobbies: [], // Will be filled on the about page
                 photos: []  // Will be handled separately
@@ -235,7 +232,7 @@ export default function Onboarding(){
             console.log("Submitting profile data:", profileData);
 
             // Send data to API
-            const response = await fetch(`/api/profile/${userId}`, {
+            const response = await fetch(`/api/profiles/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

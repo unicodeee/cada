@@ -4,26 +4,22 @@ import { useEffect, useState } from 'react';
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Heading, SectionHeading } from "@/components/ui/heading";
-import { getImageUrl, getUserIdByEmail } from "@lib/actions";
+import {countObjectsInFolder, getImageUrl, getUserIdByEmail} from "@lib/actions";
+import {PROFILE_STEPS} from "@lib/data";
+
 
 // Type definition for profile data
 interface ProfileData {
     preferredName?: string;
     gender?: string;
     sexualOrientation?: string;
-    yearBorn?: number;
     hobbies: string[];
     description?: string;
     photos: string[];
 }
 
 // Define steps in the profile creation process
-const PROFILE_STEPS = {
-    BASIC_INFO: 'onboarding',  // Name, gender, orientation, year
-    ABOUT_ME: 'aboutme',       // Hobbies and bio
-    PHOTOS: 'images',          // Profile pictures
-    COMPLETE: 'mainprofile'    // Complete profile
-};
+
 
 export default function ProfilePage() {
     const { data: session, status } = useSession();
@@ -38,7 +34,7 @@ export default function ProfilePage() {
     // Get user identifier - try email if userId not available
     const getUserId = () => {
         if (!session?.user) return null;
-        return session.user.userId || session.user.id || session.user.email;
+        return session.user.userId || session.user.email;
     };
 
     // Calculate age from year born
@@ -49,15 +45,14 @@ export default function ProfilePage() {
     };
 
     // Determine which step of the profile creation process the user needs to complete
-    const determineProfileStep = (profileData: ProfileData | null): string => {
+    const determineProfileStep = (profileData: ProfileData | null, imgCount: number): string => {
         if (!profileData) {
             return PROFILE_STEPS.BASIC_INFO; // Start with basic info if no profile exists
         }
 
         // Check for basic info (step 1)
         const hasBasicInfo = profileData.preferredName &&
-            profileData.gender &&
-            profileData.yearBorn;
+            profileData.gender
         if (!hasBasicInfo) {
             return PROFILE_STEPS.BASIC_INFO;
         }
@@ -71,7 +66,11 @@ export default function ProfilePage() {
         }
 
         // Check for photos (step 3)
-        const hasPhotos = profileData.photos && profileData.photos.length > 0;
+        // const hasPhotos = profileData.photos && profileData.photos.length > 0;
+
+        const min_photos = 3;
+
+        const hasPhotos = imgCount > min_photos;
         if (!hasPhotos) {
             return PROFILE_STEPS.PHOTOS;
         }
@@ -96,14 +95,17 @@ export default function ProfilePage() {
             }
 
             try {
-                const response = await fetch(`/api/profile/${userId}`);
+                const response = await fetch(`/api/profiles/}`);
 
                 if (response.ok) {
                     const profileData = await response.json();
                     setProfile(profileData);
 
                     // Determine which profile step the user should be on
-                    const nextStep = determineProfileStep(profileData);
+
+                    const count = await countObjectsInFolder(getUserId()!);
+
+                    const nextStep = determineProfileStep(profileData, count);
 
                     if (nextStep !== PROFILE_STEPS.COMPLETE && !redirecting) {
                         setRedirecting(true);
@@ -190,33 +192,6 @@ export default function ProfilePage() {
     const handleEditProfile = () => {
         router.push('/onboarding');
     };
-
-    // Loading state
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center h-screen">
-                <p>Loading profile...</p>
-            </div>
-        );
-    }
-
-    // No session state
-    if (status === "unauthenticated") {
-        return (
-            <div className="flex items-center justify-center h-screen p-4">
-                <div className="text-center mb-6">
-                    <h1 className="text-2xl font-bold">Sign in to view your profile</h1>
-                    <p className="text-gray-500 mt-2">You need to be logged in to see your profile</p>
-                </div>
-                <button
-                    className="px-4 py-2 bg-purple-600 text-white rounded-md"
-                    onClick={() => router.push('/')}
-                >
-                    Go to Login
-                </button>
-            </div>
-        );
-    }
 
     // No profile state
     if (!profile) {

@@ -31,7 +31,7 @@ export default function FooterNavigation() {
     // Get user identifier
     const getUserId = () => {
         if (!session?.user) return null;
-        return session.user.userId || session.user.id || session.user.email;
+        return session.user.userId || session.user.email;
     };
 
     // Check if profile is complete
@@ -49,7 +49,7 @@ export default function FooterNavigation() {
             }
 
             try {
-                const response = await fetch(`/api/profile/${userId}`);
+                const response = await fetch(`/api/profiles`);
 
                 if (response.ok) {
                     const profileData = await response.json();

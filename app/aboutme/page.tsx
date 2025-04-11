@@ -9,6 +9,7 @@ import { Button1, Button3 } from "@components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { Plus, AlertCircle } from "lucide-react";
 import {SectionHeading} from "@components/ui/heading";
+import {profileSchema} from "@lib/formdata";
 
 export default function AboutPage() {
     const { data: session, status } = useSession();
@@ -39,24 +40,9 @@ export default function AboutPage() {
     // Fetch existing profile data when component mounts
     useEffect(() => {
         const fetchProfileData = async () => {
-            if (status !== "authenticated") {
-                toast({
-                    title: "Not logged in",
-                    description: "Please log in to continue",
-                    variant: "destructive"
-                });
-                router.push('/');
-                return;
-            }
-
-            const userId = getUserId();
-            if (!userId) {
-                console.error("No user identifier found in session");
-                return;
-            }
 
             try {
-                const response = await fetch(`/api/profile/${userId}`);
+                const response = await fetch(`/api/profiles/`);
 
                 if (response.ok) {
                     const profileData = await response.json();
@@ -241,7 +227,7 @@ export default function AboutPage() {
 
         try {
             // First, get existing profile to preserve other fields
-            const getResponse = await fetch(`/api/profile/${userId}`);
+            const getResponse = await fetch(`/api/profiles/`);
             let existingData = {};
 
             if (getResponse.ok) {
@@ -264,14 +250,35 @@ export default function AboutPage() {
 
             console.log("Submitting profile data:", profileData);
 
+
+
+            const validationResult = profileSchema.safeParse(profileData);
+            console.log('validationResult:', validationResult);
+
+            if (!validationResult.success) {
+                // return res.status(400).json({ message: "Invalid profile data",
+                //     errors: JSON.parse(validationResult.error.message),
+                //     body: (req.body) });
+
+                console.log('Error updating profile:', (validationResult.error.message));
+                toast({
+                    title: "Error",
+                    description: validationResult.error.message ? validationResult.error.message : "Failed to update profile",
+                    variant: "destructive"
+                });
+            }
+
+
+
             // Send data to API
-            const response = await fetch(`/api/profile/${userId}`, {
+            const response = await fetch(`/api/profiles`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(profileData),
             });
+            console.log("abc: ", JSON.stringify(profileData));
 
             // Log raw response
             console.log("Response status:", response.status);
