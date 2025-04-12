@@ -1,102 +1,77 @@
-"use client";
+'use client';
 
 import { useEffect, useState } from 'react';
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-
-interface ProfileData {
-    preferredName?: string;
-    gender?: string;
-    sexualOrientation?: string;
-    dateOfBirth?: string;
-    hobbies: string[];
-    description?: string;
-    photos: string[];
-}
 
 export default function ProfileRouter() {
     const { data: session, status } = useSession();
     const router = useRouter();
     const [loading, setLoading] = useState(true);
 
-    // Get user identifier
-    const getUserId = () => {
-        if (!session?.user) return null;
-        return session.user.userId || session.user.email;
-    };
-
     useEffect(() => {
-        const routeToCorrectPage = async () => {
-            // Handle non-authenticated users
+        const checkUserStatus = async () => {
+            // Wait for session
+            if (status === "loading") return;
 
-
-            // Wait for session to load
-            if (status === "loading") {
-                return;
-            }
-
-            const userId = getUserId();
-            if (!userId) {
-                console.error("No user identifier found in session");
-                setLoading(false);
+            // Redirect to home if not authenticated
+            if (status !== "authenticated") {
+                router.push('/');
                 return;
             }
 
             try {
-                const response = await fetch(`/api/profile/`);
+                // Check if user has a profile
+                const response = await fetch(`/api/profiles/`);
 
+                // User has a profile - redirect to matches page
                 if (response.ok) {
-                    // Profile exists, check if complete
-                    const profileData: ProfileData = await response.json();
-
-                    // Check step 1: Basic info
-                    // if (!profileData.preferredName || !profileData.gender || !profileData.dateOfBirth) {
-                    //     router.push('/onboarding');
-                    //     return;
-                    // }
-
-                    // Check step 2: About me
-                    // if (!profileData.description || !profileData.hobbies || profileData.hobbies.length === 0) {
-                    //     router.push('/aboutme');
-                    //     return;
-                    // }
-                    //
-                    // // Check step 3: Photos
-                    // if (!profileData.photos || profileData.photos.length === 0) {
-                    //     router.push('/images');
-                    //     return;
-                    // }
-
-                    // Profile is complete
-                    router.push('/mainprofile');
-
-                } else if (response.status === 404) {
-                    // Profile doesn't exist, start at onboarding
-                    // router.push('/onboarding');
-                } else {
-                    console.error("Failed to fetch profile data:", response.status);
-                    // On error, just go to main profile page (will handle errors there)
-                    router.push('/mainprofile');
+                    // Ensure we mark tutorial as seen
+                    localStorage.setItem('cada_tutorial_seen', 'true');
+                    router.push('/matches');
+                    return;
                 }
+
+                // User doesn't have a profile (404)
+                if (response.status === 404) {
+                    // Check if tutorial has been seen
+                    const hasSeenTutorial = localStorage.getItem('cada_tutorial_seen') === 'true';
+
+                    if (hasSeenTutorial) {
+                        // User has seen tutorial but no profile - go to onboarding
+                        router.push('/onboarding');
+                    } else {
+                        // First-time user - show tutorial
+                        router.push('/tutorial');
+                    }
+                    return;
+                }
+
+                // Handle other error cases
+                console.error("Error checking profile status:", response.status);
+                router.push('/tutorial'); // Default to tutorial as a fallback
+
             } catch (error) {
-                console.error('Error routing to profile page:', error);
-                router.push('/mainprofile');
+                console.error("Error in profile router:", error);
+                router.push('/tutorial'); // Default to tutorial on error
             } finally {
                 setLoading(false);
             }
         };
 
-        routeToCorrectPage();
+        checkUserStatus();
     }, [status, session, router]);
 
+    // Loading state
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-screen">
-                <p>Loading profile...</p>
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-purple-600 mr-3"></div>
+                <p className="text-xl text-gray-700">Getting things ready...</p>
             </div>
         );
     }
 
-    // This should never be displayed as we're always redirecting
+    // This component always redirects
     return null;
 }

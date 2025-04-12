@@ -1,14 +1,12 @@
 "use client"
 import React, {useState, useEffect} from "react";
 import {useSession} from "next-auth/react";
-import {Label} from "@components/ui/label";
 import {Input, LargeInput} from "@components/ui/input";
 import {Button1} from "@components/ui/button";
 import {allGenders, allSexualOrientations} from "@lib/data";
 import {useRouter} from "next/navigation";
 import { toast } from "@/components/ui/use-toast";
-import { Heading, SectionHeading } from "@/components/ui/heading";
-import {date} from "zod";
+import { SectionHeading } from "@/components/ui/heading";
 
 export default function Onboarding(){
     const { data: session, status } = useSession();
@@ -18,18 +16,22 @@ export default function Onboarding(){
     // Form state
     const [formData, setFormData] = useState({
         preferredName: "",
+        major: "",
         gender: "",
         dayBorn: "",
         monthBorn: "",
         yearBorn: "",
-        sexualOrientation: ""
+        sexualOrientation: "",
+        genderPreference: ""
     });
 
     // Error states
     const [errors, setErrors] = useState({
         preferredName: false,
+        major: false,
         gender: false,
-        birthday: false
+        birthday: false,
+        genderPreference: false
     });
 
     // Get user identifier
@@ -54,20 +56,32 @@ export default function Onboarding(){
 
                 if (response.ok) {
                     const profileData = await response.json();
+
+                    // Extract day, month, year from dateOfBirth if it exists
+                    let dayBorn = "";
+                    let monthBorn = "";
+                    let yearBorn = "";
+
+                    if (profileData.dateOfBirth) {
+                        const date = new Date(profileData.dateOfBirth);
+                        dayBorn = date.getDate().toString().padStart(2, '0');
+                        monthBorn = (date.getMonth() + 1).toString().padStart(2, '0'); // Month is 0-indexed
+                        yearBorn = date.getFullYear().toString();
+                    }
+
                     setFormData({
                         preferredName: profileData.preferredName || "",
+                        major: profileData.major || "",
                         gender: profileData.gender || "",
-                        dayBorn: profileData.dayBorn ? profileData.dayBorn.toString() : "",
-                        monthBorn: profileData.monthBorn ? profileData.monthBorn.toString() : "",
-                        yearBorn: profileData.yearBorn ? profileData.yearBorn.toString() : "",
-                        sexualOrientation: profileData.sexualOrientation || ""
+                        dayBorn,
+                        monthBorn,
+                        yearBorn,
+                        sexualOrientation: profileData.sexualOrientation || "",
+                        genderPreference: profileData.genderPreference || ""
                     });
                 } else {
-                    // If 404, it's a new user without a profile yet - this is normal
                     if (response.status !== 404) {
-                        // Only log as error for non-404 responses
                         console.warn("Profile fetch warning:", response.status);
-                        // Don't try to parse JSON for error responses
                     }
                 }
             } catch (error) {
@@ -87,7 +101,9 @@ export default function Onboarding(){
         if (id === "preferredName" && value.trim()) {
             setErrors(prev => ({ ...prev, preferredName: false }));
         }
-
+        if (id === "major" && value.trim()){
+            setErrors(prev=>({...prev, major: false}));
+        }
         if (["dayBorn", "monthBorn", "yearBorn"].includes(id)) {
             validateBirthday(id, value);
         }
@@ -117,13 +133,16 @@ export default function Onboarding(){
         }
     };
 
-    // Handle button selection (for gender and orientation)
+    // Handle button selection (for gender, orientation, and gender preference)
     const handleButtonSelection = (field: string, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
 
-        // Clear gender error when selected
+        // Clear errors when selections are made
         if (field === "gender") {
             setErrors(prev => ({ ...prev, gender: false }));
+        }
+        if (field === "genderPreference") {
+            setErrors(prev => ({ ...prev, genderPreference: false }));
         }
     };
 
@@ -131,8 +150,10 @@ export default function Onboarding(){
     const validateForm = () => {
         const newErrors = {
             preferredName: !formData.preferredName.trim(),
+            major: !formData.major.trim(),
             gender: !formData.gender,
-            birthday: false
+            birthday: false,
+            genderPreference: !formData.genderPreference
         };
 
         // Validate birthday if any fields are filled
@@ -145,13 +166,11 @@ export default function Onboarding(){
             const monthValid = formData.monthBorn ? !isNaN(month) && month >= 1 && month <= 12 : false;
             const yearValid = formData.yearBorn ? !isNaN(year) && year >= 1900 && year <= new Date().getFullYear() : false;
 
-            // Error if not all fields provided or any field is invalid
             const allFieldsProvided = formData.dayBorn && formData.monthBorn && formData.yearBorn;
             const fieldsValid = dayValid && monthValid && yearValid;
 
             newErrors.birthday = !allFieldsProvided || !fieldsValid;
         } else {
-            // All fields empty - no error (birthday is optional)
             newErrors.birthday = false;
         }
 
@@ -166,10 +185,26 @@ export default function Onboarding(){
             });
         }
 
+        if (newErrors.major) {
+            toast({
+                title: "Missing Information",
+                description: "Please enter your major",
+                variant: "destructive"
+            });
+        }
+
         if (newErrors.gender) {
             toast({
                 title: "Missing Information",
                 description: "Please select your gender",
+                variant: "destructive"
+            });
+        }
+
+        if (newErrors.genderPreference) {
+            toast({
+                title: "Missing Information",
+                description: "Please select your gender preference",
                 variant: "destructive"
             });
         }
@@ -182,7 +217,7 @@ export default function Onboarding(){
             });
         }
 
-        return !newErrors.preferredName && !newErrors.gender && !newErrors.birthday;
+        return !newErrors.preferredName && !newErrors.major && !newErrors.gender && !newErrors.birthday && !newErrors.genderPreference;
     };
 
     // Handle form submission
@@ -193,6 +228,8 @@ export default function Onboarding(){
             // Focus on the first input with an error
             if (errors.preferredName) {
                 document.getElementById('preferredName')?.focus();
+            } else if (errors.major) {
+                document.getElementById('major')?.focus();
             } else if (errors.birthday) {
                 document.getElementById('dayBorn')?.focus();
             }
@@ -221,14 +258,35 @@ export default function Onboarding(){
         setLoading(true);
 
         try {
+            // Convert day, month, year to proper DateTime object if all fields are provided
+            let dateOfBirth = null;
+            if (formData.dayBorn && formData.monthBorn && formData.yearBorn) {
+                // Format: YYYY-MM-DD for proper ISO date string
+                const year = parseInt(formData.yearBorn);
+                const month = parseInt(formData.monthBorn) - 1; // JavaScript months are 0-indexed
+                const day = parseInt(formData.dayBorn);
+
+                // Create a Date object (handles validation too)
+                const date = new Date(year, month, day);
+
+                // Check if date is valid
+                if (isNaN(date.getTime())) {
+                    throw new Error("Invalid date");
+                }
+
+                dateOfBirth = date.toISOString();
+            }
+
             // Prepare data for submission
             const profileData = {
                 preferredName: formData.preferredName,
+                major: formData.major,
                 gender: formData.gender,
+                genderPreference: formData.genderPreference,
                 sexualOrientation: formData.sexualOrientation || null,
-                dateOfBirth: `01/01/2000`,
-                hobbies: [], // Will be filled on the about page
-                photos: []  // Will be handled separately
+                dateOfBirth: dateOfBirth,
+                hobbies: [],
+                photos: []
             };
 
             console.log("Submitting profile data:", profileData);
@@ -287,7 +345,7 @@ export default function Onboarding(){
         }
     };
 
-    // Custom style for button components that mimics the screenshot
+    // Custom style for button components
     const buttonStyle = (isSelected: boolean) => {
         return `w-full py-3 font-medium rounded-full transition-colors ${
             isSelected
@@ -297,27 +355,27 @@ export default function Onboarding(){
     };
 
     return (
-        <main className="flex flex-row justify-center items-start gap-20 px-6 py-8 w-full max-w-6xl mx-auto flex-grow">
-            <div className="min-h-screen bg-white flex flex-col items-center justify-start p-8 overflow-y-auto">
-                {/* Heart Progress */}
-                <div className="mb-12 text-center">
-                    <img src="/cada_heart.png" alt="Heart" className="w-20 h-20"/>
-                </div>
+        <main className="flex flex-col items-center px-4 py-8 pb-24 w-full max-w-6xl mx-auto">
+            {/* Heart Progress */}
+            <div className="mb-8 text-center">
+                <img src="/cada_heart.png" alt="Heart" className="w-20 h-20"/>
+            </div>
 
-                {/* Content */}
-                <form onSubmit={handleSubmit} className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-x-24 gap-y-24">
-                    {/* Left Column */}
-                    <div>
-                        {/* CADA Identity */}
-                        <div className="mb-28">
+            {/* Content */}
+            <form onSubmit={handleSubmit} className="w-full max-w-5xl">
+                {/* Personal Information Section (Top) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mb-10">
+                    {/* Left Side - Name and Major */}
+                    <div className="flex flex-col gap-6">
+                        {/* Name */}
+                        <div>
                             <SectionHeading>
-                                Hi {session?.user?.name ? session.user.name : "CADA identity 😎"}
+                                Hi {session?.user?.name?.split(' ')[0] || "there"}
                             </SectionHeading>
-
                             <p className="text-gray-600 mb-4">
                                 Create a unique nickname that represents you. It's how others will know and remember you.
                             </p>
-                            <div className="flex flex-col space-y-1.5">
+                            <div>
                                 <LargeInput
                                     id="preferredName"
                                     placeholder="Your preferred name"
@@ -331,122 +389,152 @@ export default function Onboarding(){
                             </div>
                         </div>
 
-                        {/* Gender Selection */}
-                        <div>
-                            <SectionHeading
-                                emoji="✨"
-                                error={errors.gender}
-                                errorMessage="Required"
-                                required={true}
-                            >
-                                Be true to yourself
-                            </SectionHeading>
-
-                            <p className="text-gray-600 mb-4">
-                                Choose the gender that best represents you.
-                            </p>
-                            <div className="flex flex-col gap-4">
-                                {Object.entries(allGenders()).map(([key, value]) => (
-                                    <button
-                                        key={key}
-                                        type="button"
-                                        onClick={() => handleButtonSelection("gender", key)}
-                                        className={buttonStyle(formData.gender === key)}
-                                    >
-                                        {value}
-                                    </button>
-                                ))}
-                            </div>
-                            {errors.gender && (
-                                <p className="text-sm text-red-500 mt-2">Please select your gender</p>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Right Column */}
-                    <div>
-                        {/* Birthday */}
-                        <div className="mb-28">
-                            <SectionHeading
-                                emoji="🎂"
-                                error={errors.birthday}
-                                errorMessage="Invalid date"
-                            >
-                                Let's celebrate you
-                            </SectionHeading>
-
-                            <p className="text-gray-600 mb-4">
-                                Tell us your birthdate. Your profile doesn't display your birthdate, only your age.
-                            </p>
-                            <div className="flex gap-4">
-                                <LargeInput
-                                    id="dayBorn"
-                                    placeholder="DD"
-                                    value={formData.dayBorn}
-                                    onChange={handleInputChange}
-                                    maxLength={2}
-                                    className={`text-center ${errors.birthday ? "border-red-500 focus:ring-red-500" : ""}`}
-                                />
-                                <LargeInput
-                                    id="monthBorn"
-                                    placeholder="MM"
-                                    value={formData.monthBorn}
-                                    onChange={handleInputChange}
-                                    maxLength={2}
-                                    className={`text-center ${errors.birthday ? "border-red-500 focus:ring-red-500" : ""}`}
-                                />
-                                <LargeInput
-                                    id="yearBorn"
-                                    placeholder="YYYY"
-                                    value={formData.yearBorn}
-                                    onChange={handleInputChange}
-                                    maxLength={4}
-                                    className={`text-center ${errors.birthday ? "border-red-500 focus:ring-red-500" : ""}`}
-                                />
-                            </div>
-                            {errors.birthday && (
-                                <p className="text-sm text-red-500 mt-2">
-                                    Please enter all date fields or leave them all empty
-                                </p>
-                            )}
-                        </div>
-
-                        {/* Orientation - ADJUSTED TO MATCH GENDER SECTION */}
+                        {/* Major */}
                         <div>
                             <SectionHeading>
-                                Sexual Orientation
+                                Major
                             </SectionHeading>
-
-                            <p className="text-gray-600 mb-4">
-                                Choose the orientation that best describes you.
-                            </p>
-                            <div className="flex flex-col gap-4">
-                                {Object.entries(allSexualOrientations()).map(([key, value]) => (
-                                    <button
-                                        key={key}
-                                        type="button"
-                                        onClick={() => handleButtonSelection("sexualOrientation", key)}
-                                        className={buttonStyle(formData.sexualOrientation === key)}
-                                    >
-                                        {value}
-                                    </button>
-                                ))}
-                            </div>
+                            <LargeInput
+                                id="major"
+                                placeholder="Your major"
+                                value={formData.major}
+                                onChange={handleInputChange}
+                                className={errors.major ? "border-red-500 focus:ring-red-500" : ""}
+                            />
+                            {errors.major && (
+                                <p className="text-sm text-red-500 mt-1">Please enter your major</p>
+                            )}
                         </div>
                     </div>
 
-                    {/* Continue Button */}
-                    <div className="md:col-span-2 mt-20 w-full flex justify-center">
-                        <Button1
-                            type="submit"
-                            className={`w-full max-w-md text-lg font-semibold py-3 rounded-full ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
-                            disabled={loading}
-                        >
-                            {loading ? "Saving..." : "Continue (1/3)"}
-                        </Button1>
+                    {/* Right Side - Birthday */}
+                    <div>
+                        <SectionHeading emoji="🎂">
+                            Let's celebrate you
+                        </SectionHeading>
+                        <p className="text-gray-600 mb-4">
+                            Tell us your birthdate. Your profile doesn't display your birthdate, only your age.
+                        </p>
+                        <div className="flex gap-4">
+                            <LargeInput
+                                id="dayBorn"
+                                placeholder="DD"
+                                value={formData.dayBorn}
+                                onChange={handleInputChange}
+                                maxLength={2}
+                                className={`text-center ${errors.birthday ? "border-red-500 focus:ring-red-500" : ""}`}
+                            />
+                            <LargeInput
+                                id="monthBorn"
+                                placeholder="MM"
+                                value={formData.monthBorn}
+                                onChange={handleInputChange}
+                                maxLength={2}
+                                className={`text-center ${errors.birthday ? "border-red-500 focus:ring-red-500" : ""}`}
+                            />
+                            <LargeInput
+                                id="yearBorn"
+                                placeholder="YYYY"
+                                value={formData.yearBorn}
+                                onChange={handleInputChange}
+                                maxLength={4}
+                                className={`text-center ${errors.birthday ? "border-red-500 focus:ring-red-500" : ""}`}
+                            />
+                        </div>
+                        {errors.birthday && (
+                            <p className="text-sm text-red-500 mt-1">
+                                Please enter all date fields or leave them all empty
+                            </p>
+                        )}
                     </div>
-                </form>
-            </div>
+                </div>
+
+                {/* Three Columns for Selection Options (Bottom) */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-8">
+                    {/* Gender Column */}
+                    <div>
+                        <SectionHeading emoji="✨" required={true}>
+                            Be true to yourself
+                        </SectionHeading>
+                        <p className="text-gray-600 mb-10">
+                            Choose the gender that best represents you.
+                        </p>
+                        <div className="flex flex-col gap-3">
+                            {Object.entries(allGenders()).map(([key, value]) => (
+                                <button
+                                    key={key}
+                                    type="button"
+                                    onClick={() => handleButtonSelection("gender", key)}
+                                    className={buttonStyle(formData.gender === key)}
+                                >
+                                    {value}
+                                </button>
+                            ))}
+                        </div>
+                        {errors.gender && (
+                            <p className="text-sm text-red-500 mt-2">Please select your gender</p>
+                        )}
+                    </div>
+
+                    {/* Gender Preference Column */}
+                    <div>
+                        <SectionHeading emoji="❤️" required={true}>
+                            Gender Preference
+                        </SectionHeading>
+                        <p className="text-gray-600 mb-4">
+                            Choose the gender you'd like to be matched with.
+                        </p>
+                        <div className="flex flex-col gap-3">
+                            {Object.entries(allGenders()).map(([key, value]) => (
+                                <button
+                                    key={key}
+                                    type="button"
+                                    onClick={() => handleButtonSelection("genderPreference", key)}
+                                    className={buttonStyle(formData.genderPreference === key)}
+                                >
+                                    {value}
+                                </button>
+                            ))}
+                        </div>
+                        {errors.genderPreference && (
+                            <p className="text-sm text-red-500 mt-2">Please select your gender preference</p>
+                        )}
+                    </div>
+
+                    {/* Sexual Orientation Column */}
+                    <div>
+                        <SectionHeading>
+                            Sexual Orientation
+                        </SectionHeading>
+                        <p className="text-gray-600 mb-4">
+                            Choose the orientation that best describes you.
+                        </p>
+                        <div className="flex flex-col gap-3">
+                            {Object.entries(allSexualOrientations()).map(([key, value]) => (
+                                <button
+                                    key={key}
+                                    type="button"
+                                    onClick={() => handleButtonSelection("sexualOrientation", key)}
+                                    className={buttonStyle(formData.sexualOrientation === key)}
+                                >
+                                    {value}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Continue Button */}
+                <div className="mt-10 w-full flex justify-center">
+                    <Button1
+                        type="submit"
+                        className={`w-full max-w-md text-lg font-semibold py-3 rounded-full ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                        disabled={loading}
+                    >
+                        {loading ? "Saving..." : "Continue (1/3)"}
+                    </Button1>
+                </div>
+            </form>
         </main>
     );
 };

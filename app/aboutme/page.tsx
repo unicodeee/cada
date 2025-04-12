@@ -472,7 +472,7 @@ export default function AboutPage() {
                     </div>
 
                     {/* Continue Button */}
-                    <div className="flex justify-center mt-36">
+                    <div className="flex justify-center mt-20">
                         <Button1
                             type="submit"
                             className={`text-lg font-bold py-4 px-12 rounded-full ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}

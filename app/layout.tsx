@@ -4,7 +4,8 @@ import { ReactNode } from "react";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import "@/app/globals.css";
 import { SessionProvider, useSession } from "next-auth/react";
-import FooterNavigation from "@/components/FooterNavigation"; // This will be our new navigation component
+import FooterNavigation from "@/components/FooterNavigation";
+import { usePathname } from "next/navigation";
 
 interface RootLayoutProps {
     children: ReactNode;
@@ -19,7 +20,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
             <SessionProvider>
                 <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
                     <ApplyLoadingStateForPage>
-                        <AuthenticatedFooter />
+                        <ConditionalFooter />
                         {children}
                     </ApplyLoadingStateForPage>
                 </ThemeProvider>
@@ -30,14 +31,16 @@ export default function RootLayout({ children }: RootLayoutProps) {
     );
 }
 
-function AuthenticatedFooter() {
+function ConditionalFooter() {
     const { status } = useSession();
+    const pathname = usePathname();
 
-    if (status === "authenticated") {
-        return <FooterNavigation />;
+    // Don't show footer navigation on tutorial page or when user is not authenticated
+    if (status !== "authenticated" || pathname === "/tutorial") {
+        return null;
     }
 
-    return null;
+    return <FooterNavigation />;
 }
 
 function ApplyLoadingStateForPage({ children }: { children: React.ReactNode }) {

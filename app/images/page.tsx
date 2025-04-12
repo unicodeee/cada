@@ -104,8 +104,14 @@ export default function ImageUploadPage() {
                 // Save image URLs to profile in database
                 updateProfileWithImageURLs();
             }, 1000);
-        } else {
+        } else if (successCount > 0) {
             toast.warning(`Uploaded ${successCount} of ${totalUploads} images`);
+            // Still update profile with the images that were successfully uploaded
+            setTimeout(() => {
+                updateProfileWithImageURLs();
+            }, 1000);
+        } else {
+            toast.error("Failed to upload any images");
         }
     };
 
@@ -126,7 +132,7 @@ export default function ImageUploadPage() {
             const validUrls = imageUrls.filter(url => url !== null) as string[];
 
             // Get existing profile data
-            const profileResponse = await fetch(`/api/profile/${userId}`);
+            const profileResponse = await fetch(`/api/profiles/`);
             let profileData = {};
 
             if (profileResponse.ok) {
@@ -134,7 +140,7 @@ export default function ImageUploadPage() {
             }
 
             // Update profile with image URLs
-            const response = await fetch(`/api/profile/${userId}`, {
+            const response = await fetch(`/api/profiles/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -147,17 +153,23 @@ export default function ImageUploadPage() {
 
             if (response.ok) {
                 toast.success("Profile updated with new images!");
-                // Navigate to profile page after a short delay
+                // Navigate to mainprofile page after a short delay
                 setTimeout(() => {
                     router.push('/mainprofile');
                 }, 1000);
             } else {
                 toast.error("Failed to update profile with images");
+                console.error("Failed to update profile:", response.status);
             }
         } catch (error) {
             console.error("Error updating profile with images:", error);
             toast.error("Error saving images to profile");
         }
+    };
+
+    const handleSkip = () => {
+        // When user skips, still go to the mainprofile page
+        router.push('/mainprofile');
     };
 
     return (
@@ -194,7 +206,7 @@ export default function ImageUploadPage() {
                         <Button
                             type="button"
                             variant="outline"
-                            onClick={() => router.push('/profile')}
+                            onClick={handleSkip}
                             className="px-6"
                         >
                             Skip

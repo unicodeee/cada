@@ -28,33 +28,43 @@ const SexualOrientationEnum = z.enum([
 ]);
 
 export const profileSchemaOnboardingStage = z.object({
-    preferedName: z.string(),
+    preferredName: z.string(),
+    major: z.string(),
     gender: GenderEnum,
-    hobbies: z.array(z.string()),
-    description: z.string(),
+    genderPreference: GenderEnum,
+    sexualOrientation: SexualOrientationEnum.optional().nullable(),
+    dateOfBirth: z.union([
+        z.string().transform((val) => new Date(val)),
+        z.date()
+    ]).optional().nullable(),
+    hobbies: z.array(z.string()).default([]),
+    photos: z.array(z.string()).default([]),
 })
 
 export const profileSchemaAboutMe = z.object({
-    preferedName: z.string(),
+    preferredName: z.string(),
+    major: z.string(),
     gender: GenderEnum,
+    genderPreference: GenderEnum,
     hobbies: z.array(z.string()),
     description: z.string(),
 })
 
-
-// Profile schema validation
+// Profile schema validation - this is the main one used in the API
 export const profileSchema = z.object({
-    gender: GenderEnum.optional(),
-    hobbies: z.array(z.string()).optional(),
-    description: z.string().optional(),
-    sexualOrientation: SexualOrientationEnum.optional(),
+    preferredName: z.string().optional().nullable(),
+    major: z.string().optional().nullable(),
+    gender: GenderEnum.optional().nullable(),
+    genderPreference: GenderEnum.optional().nullable(),
+    hobbies: z.array(z.string()).optional().default([]),
+    description: z.string().optional().nullable(),
+    sexualOrientation: SexualOrientationEnum.optional().nullable(),
     dateOfBirth: z.union([   // auto transform to a Date object from request
         z.string().transform((val) => new Date(val)),
         z.date()
-    ]).optional(),
-    photos: z.array(z.string()).optional(),
+    ]).optional().nullable(),
+    photos: z.array(z.string()).optional().default([]),
 });
-
 
 // Define the Zod schema for the file structure
 export const formidableFileSchema = z.object({
@@ -64,7 +74,6 @@ export const formidableFileSchema = z.object({
     size: z.number(),
     // Add any other properties you expect the file to have
 });
-
 
 export const swipeSchema = z.object({
     swiperId: z.string().uuid(),

@@ -3,83 +3,58 @@
 import { useEffect, useState } from 'react';
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Heading, SectionHeading } from "@/components/ui/heading";
-import {countObjectsInFolder, getImageUrl, getUserIdByEmail} from "@lib/actions";
-import {PROFILE_STEPS} from "@lib/data";
-
+import { Heading } from "@/components/ui/heading";
+import { getImageUrl, getUserIdByEmail } from "@lib/actions";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { Pencil } from "lucide-react";
 
 // Type definition for profile data
 interface ProfileData {
     preferredName?: string;
     gender?: string;
     sexualOrientation?: string;
+    major?: string;
+    dateOfBirth?: string;
     hobbies: string[];
     description?: string;
     photos: string[];
+    genderPreference?: string;
 }
-
-// Define steps in the profile creation process
-
 
 export default function ProfilePage() {
     const { data: session, status } = useSession();
     const router = useRouter();
-    const [profileComplete, setProfileComplete] = useState(false);
     const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
     const [profile, setProfile] = useState<ProfileData | null>(null);
     const [loading, setLoading] = useState(true);
     const [imageUrls, setImageUrls] = useState<string[]>([]);
-    const [redirecting, setRedirecting] = useState(false);
+    const [incompleteStep, setIncompleteStep] = useState<string | null>(null);
+    // Flag to prevent multiple image loading attempts
+    const [imagesLoaded, setImagesLoaded] = useState(false);
 
-    // Get user identifier - try email if userId not available
+    // Get user identifier
     const getUserId = () => {
         if (!session?.user) return null;
-        return session.user.userId || session.user.email;
+        return session.user.userId || session.user.id || session.user.email;
     };
 
-    // Calculate age from year born
-    const calculateAge = (yearBorn?: number) => {
-        if (!yearBorn) return null;
-        const currentYear = new Date().getFullYear();
-        return currentYear - yearBorn;
+    // Calculate age from date of birth
+    const calculateAge = (dateOfBirth?: string) => {
+        if (!dateOfBirth) return null;
+        const birthDate = new Date(dateOfBirth);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+
+        return age;
     };
 
-    // Determine which step of the profile creation process the user needs to complete
-    const determineProfileStep = (profileData: ProfileData | null, imgCount: number): string => {
-        if (!profileData) {
-            return PROFILE_STEPS.BASIC_INFO; // Start with basic info if no profile exists
-        }
-
-        // Check for basic info (step 1)
-        const hasBasicInfo = profileData.preferredName &&
-            profileData.gender
-        if (!hasBasicInfo) {
-            return PROFILE_STEPS.BASIC_INFO;
-        }
-
-        // Check for about me info (step 2)
-        const hasAboutInfo = profileData.description &&
-            profileData.hobbies &&
-            profileData.hobbies.length > 0;
-        if (!hasAboutInfo) {
-            return PROFILE_STEPS.ABOUT_ME;
-        }
-
-        // Check for photos (step 3)
-        // const hasPhotos = profileData.photos && profileData.photos.length > 0;
-
-        const min_photos = 3;
-
-        const hasPhotos = imgCount > min_photos;
-        if (!hasPhotos) {
-            return PROFILE_STEPS.PHOTOS;
-        }
-
-        // If all steps are completed
-        return PROFILE_STEPS.COMPLETE;
-    };
-
-    // Fetch profile data and redirect if necessary
+    // Fetch profile data and check completeness
     useEffect(() => {
         const fetchProfileData = async () => {
             if (status !== "authenticated") {
@@ -95,178 +70,275 @@ export default function ProfilePage() {
             }
 
             try {
-                const response = await fetch(`/api/profiles/}`);
+                const response = await fetch(`/api/profiles/`);
 
                 if (response.ok) {
                     const profileData = await response.json();
                     setProfile(profileData);
 
-                    // Determine which profile step the user should be on
-
-                    const count = await countObjectsInFolder(getUserId()!);
-
-                    const nextStep = determineProfileStep(profileData, count);
-
-                    if (nextStep !== PROFILE_STEPS.COMPLETE && !redirecting) {
-                        setRedirecting(true);
-                        console.log(`Profile incomplete, redirecting to /${nextStep}`);
-                        router.push(`/${nextStep}`);
-                        return;
-                    }
-
-                    // If we get here, profile is complete
-                    setProfileComplete(true);
+                    // Check if profile has required sections
+                    checkProfileCompleteness(profileData);
                 } else if (response.status === 404) {
-                    // No profile found, redirect to first step
-                    console.log("No profile found, redirecting to onboarding");
-                    if (!redirecting) {
-                        setRedirecting(true);
-                        router.push('/onboarding');
-                        return;
-                    }
+                    // No profile found - redirect to profile creation
+                    router.push('/onboarding');
                 } else {
                     console.error("Failed to fetch profile data");
+                    toast.error("Failed to load profile data");
                 }
             } catch (error) {
                 console.error('Error fetching profile data:', error);
+                toast.error("Error loading profile");
             } finally {
                 setLoading(false);
             }
         };
 
         fetchProfileData();
-    }, [status, session, router, redirecting]);
+    }, [status, session, router]);
 
-    // Load images from Google Cloud
-    useEffect(() => {
-        const loadImagesFromCloud = async () => {
-            if (!session?.user?.email || !profile) return;
+    // Check if profile is missing any required sections
+    const checkProfileCompleteness = (profileData: ProfileData) => {
+        // Reset the incomplete step before checking
+        let foundIncompleteStep = null;
 
-            try {
-                const userId = await getUserIdByEmail(session.user.email);
-
-                // Try to load 6 images (indexes 0-5)
-                const urls = await Promise.all(
-                    Array(6).fill(null).map((_, index) =>
-                        getImageUrl(`${userId}/${index}`)
-                            .then(url => url)
-                            .catch(() => null) // Return null if image doesn't exist
-                    )
-                );
-
-                // Filter out any null values (images that couldn't be loaded)
-                const validUrls = urls.filter(url => url !== null) as string[];
-
-                // Update state with these images
-                setImageUrls(validUrls);
-
-                if (profile) {
-                    setProfile({
-                        ...profile,
-                        photos: validUrls
-                    });
-                }
-            } catch (error) {
-                console.error("Error loading images from cloud:", error);
-            }
-        };
-
-        if (session?.user?.email && profile) {
-            loadImagesFromCloud();
+        // Check basic info from onboarding page
+        if (!profileData.preferredName || !profileData.gender || !profileData.major || !profileData.genderPreference) {
+            foundIncompleteStep = 'onboarding';
         }
-    }, [session, profile]);
+        // Only check next section if the previous one is complete
+        else if (!profileData.description || !profileData.hobbies || profileData.hobbies.length === 0) {
+            foundIncompleteStep = 'aboutme';
+        }
+        // Only check photos if everything else is complete
+        else if (!profileData.photos || profileData.photos.length === 0) {
+            // Also check imageUrls in case photos are loaded via storage
+            if (imageUrls.length === 0) {
+                foundIncompleteStep = 'images';
+            }
+        }
+
+        // Set the incomplete step (or null if profile is complete)
+        setIncompleteStep(foundIncompleteStep);
+    };
+
+    // Load images from storage - only run once when profile is first loaded
+    useEffect(() => {
+        // Only load images if we have a profile and haven't loaded images yet
+        if (profile && !imagesLoaded && session?.user?.email) {
+            const loadImagesFromStorage = async () => {
+                try {
+                    const userId = await getUserIdByEmail(session.user.email!);
+
+                    // Try to load 6 images (indexes 0-5)
+                    const urls = await Promise.all(
+                        Array(6).fill(null).map((_, index) =>
+                            getImageUrl(`${userId}/${index}`)
+                                .then(url => url)
+                                .catch(() => null) // Return null if image doesn't exist
+                        )
+                    );
+
+                    // Filter out any null values (images that couldn't be loaded)
+                    const validUrls = urls.filter(url => url !== null) as string[];
+
+                    if (validUrls.length > 0) {
+                        setImageUrls(validUrls);
+
+                        // Update the profile with images
+                        setProfile(prevProfile => {
+                            if (!prevProfile) return null;
+
+                            // Create updated profile with the new photo URLs
+                            const updatedProfile = {
+                                ...prevProfile,
+                                photos: validUrls
+                            };
+
+                            // Re-check completeness with updated profile data
+                            checkProfileCompleteness(updatedProfile);
+
+                            return updatedProfile;
+                        });
+                    } else {
+                        // Re-check completeness with current profile data
+                        // This ensures we catch the case where no images were found
+                        if (profile) {
+                            checkProfileCompleteness(profile);
+                        }
+                    }
+
+                    // Mark images as loaded to prevent repeated loading
+                    setImagesLoaded(true);
+                } catch (error) {
+                    console.error("Error loading images:", error);
+                    // Still mark as loaded to prevent infinite retries
+                    setImagesLoaded(true);
+                }
+            };
+
+            loadImagesFromStorage();
+        }
+    }, [profile, session, imagesLoaded]);
 
     // Navigate to next photo
     const nextPhoto = () => {
-        if (!profile?.photos?.length) return;
-        setCurrentPhotoIndex((prev) => (prev === profile.photos.length - 1 ? 0 : prev + 1));
+        if (!imageUrls.length) return;
+        setCurrentPhotoIndex((prev) => (prev === imageUrls.length - 1 ? 0 : prev + 1));
     };
 
     // Navigate to previous photo
     const prevPhoto = () => {
-        if (!profile?.photos?.length) return;
-        setCurrentPhotoIndex((prev) => (prev === 0 ? profile.photos.length - 1 : prev - 1));
+        if (!imageUrls.length) return;
+        setCurrentPhotoIndex((prev) => (prev === 0 ? imageUrls.length - 1 : prev - 1));
     };
 
-    // Handle navigation to edit profile
+    // Handle edit profile - go to the specific section that needs editing
     const handleEditProfile = () => {
-        router.push('/onboarding');
+        if (incompleteStep) {
+            // If there's an incomplete section, go directly to it
+            router.push(`/${incompleteStep}`);
+        } else {
+            // If profile is complete, default to onboarding page
+            router.push('/onboarding');
+        }
     };
 
-    // No profile state
-    if (!profile) {
+    // Format hobby string for display
+    const formatHobby = (hobbyKey: string) => {
+        if (hobbyKey.startsWith('custom_')) {
+            // Format custom hobby: remove prefix, replace underscores with spaces, capitalize words
+            const formattedHobby = hobbyKey
+                .replace('custom_', '')
+                .replace(/_/g, ' ')
+                .split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+
+            return formattedHobby;
+        }
+
+        // For predefined hobbies, use as is (would ideally use allHobbies() but keeping it simple)
+        return hobbyKey;
+    };
+
+    // Loading state
+    if (loading) {
         return (
-            <div className="flex items-center justify-center h-screen p-4">
-                <div className="text-center mb-6">
-                    <h1 className="text-2xl font-bold">Complete Your Profile</h1>
-                    <p className="text-gray-500 mt-2">You haven't created a profile yet</p>
-                </div>
-                <button
-                    className="px-4 py-2 bg-purple-600 text-white rounded-md"
-                    onClick={() => router.push('/onboarding')}
-                >
-                    Create Profile
-                </button>
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
+                <p className="ml-3 text-lg text-gray-700">Loading your profile...</p>
             </div>
         );
     }
 
-    // Determine which photos to show - use imageUrls if available, otherwise use profile.photos
+    // No profile state - redirect to profile creation
+    if (!profile) {
+        router.push('/onboarding');
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
+                <p className="ml-3 text-lg text-gray-700">Redirecting to profile creation...</p>
+            </div>
+        );
+    }
+
+    // Incomplete profile banner
+    const IncompleteBanner = () => {
+        if (!incompleteStep) return null;
+
+        const stepMessages = {
+            'onboarding': 'Your basic profile information is incomplete.',
+            'aboutme': 'Please complete your about me section and hobbies.',
+            'images': 'Your profile needs at least one photo.'
+        };
+
+        const message = stepMessages[incompleteStep as keyof typeof stepMessages] || 'Your profile is incomplete.';
+
+        return (
+            <div className="bg-amber-50 border-l-4 border-amber-500 p-4 mb-6">
+                <div className="flex">
+                    <div className="flex-shrink-0">
+                        <svg className="h-5 w-5 text-amber-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                    </div>
+                    <div className="ml-3">
+                        <p className="text-sm text-amber-700">
+                            {message}
+                            <button
+                                onClick={() => router.push(`/${incompleteStep}`)}
+                                className="ml-2 font-medium underline text-amber-800 hover:text-amber-600"
+                            >
+                                Complete now
+                            </button>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    // Determine which photos to display - prefer imageUrls if available
     const displayPhotos = imageUrls.length > 0 ? imageUrls : (profile.photos || []);
     const hasPhotos = displayPhotos.length > 0;
 
     return (
         <div className="container mx-auto px-4 py-6 max-w-2xl">
             {/* Header */}
-            <header className="mb-4 border-b pb-4">
-                <Heading>Profile</Heading>
-            </header>
-            {/* Edit profile button - bottom right, but not fixed */}
-            <div className="sticky bottom-4 flex justify-end">
-                <button
+            <header className="mb-4 border-b pb-4 flex justify-between items-center">
+                <Heading>My Profile</Heading>
+                {/* Edit button */}
+                <Button
                     onClick={handleEditProfile}
-                    className="bg-purple-600 text-white p-4 rounded-full shadow-lg"
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-1"
                 >
-                    ✏️
-                </button>
-            </div>
+                    <Pencil size={16} />
+                    Edit Profile
+                </Button>
+            </header>
+
+            {/* Incomplete profile warning if needed */}
+            <IncompleteBanner />
+
             <div className="flex flex-col">
                 {/* Profile photo */}
                 <div className="w-full mb-6">
                     <div className="aspect-square rounded-lg overflow-hidden max-w-md mx-auto">
                         {hasPhotos ? (
-                            <>
-                                <div className="relative w-full h-full">
-                                    <img
-                                        src={displayPhotos[currentPhotoIndex]}
-                                        alt={`Profile photo ${currentPhotoIndex + 1}`}
-                                        className="object-cover w-full h-full"
-                                        onError={(e) => {
-                                            const target = e.target as HTMLImageElement;
-                                            target.onerror = null;
-                                            target.src = 'https://via.placeholder.com/400x400?text=Image+Error';
-                                        }}
-                                    />
-                                </div>
+                            <div className="relative w-full h-full">
+                                <img
+                                    src={displayPhotos[currentPhotoIndex]}
+                                    alt={`Profile photo ${currentPhotoIndex + 1}`}
+                                    className="object-cover w-full h-full"
+                                    onError={(e) => {
+                                        const target = e.target as HTMLImageElement;
+                                        target.onerror = null;
+                                        target.src = 'https://via.placeholder.com/400x400?text=Image+Error';
+                                    }}
+                                />
 
-                                {/* Left/Right navigation for photos */}
+                                {/* Photo navigation (only if multiple photos) */}
                                 {displayPhotos.length > 1 && (
                                     <>
                                         <button
                                             onClick={prevPhoto}
                                             className="absolute left-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-40 text-white p-2 rounded-full"
+                                            aria-label="Previous photo"
                                         >
                                             ←
                                         </button>
                                         <button
                                             onClick={nextPhoto}
                                             className="absolute right-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-40 text-white p-2 rounded-full"
+                                            aria-label="Next photo"
                                         >
                                             →
                                         </button>
                                     </>
                                 )}
-                            </>
+                            </div>
                         ) : (
                             <div className="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-700">
                                 <p className="text-gray-500">No photos uploaded</p>
@@ -274,14 +346,14 @@ export default function ProfilePage() {
                         )}
                     </div>
 
-                    {/* Carousel indicators */}
+                    {/* Photo carousel indicators */}
                     {hasPhotos && displayPhotos.length > 1 && (
                         <div className="flex justify-center mt-2 space-x-1">
                             {displayPhotos.map((_, index) => (
                                 <div
                                     key={index}
                                     onClick={() => setCurrentPhotoIndex(index)}
-                                    className={`h-1 rounded-full cursor-pointer ${
+                                    className={`h-1 rounded-full cursor-pointer transition-all ${
                                         index === currentPhotoIndex ? 'bg-purple-600 w-8' : 'bg-gray-300 w-1'
                                     }`}
                                 />
@@ -294,28 +366,55 @@ export default function ProfilePage() {
                 <div className="pb-16">
                     <h2 className="text-2xl font-bold mb-4">
                         {profile.preferredName || session?.user?.name || "User"}
-                        {profile.yearBorn && ` (${calculateAge(profile.yearBorn)})`}
+                        {profile.dateOfBirth && ` (${calculateAge(profile.dateOfBirth)})`}
                     </h2>
 
                     <div className="space-y-4">
+                        {profile.major && (
+                            <div className="flex items-center gap-2">
+                                <span>🎓</span>
+                                <span className="capitalize">Major: {profile.major}</span>
+                            </div>
+                        )}
+
                         {profile.gender && (
                             <div className="flex items-center gap-2">
                                 <span>👤</span>
-                                <span className="capitalize">Gender and Sexual: {profile.gender} {profile.sexualOrientation && `• ${profile.sexualOrientation}`}</span>
+                                <span className="capitalize">
+                                    Gender: {profile.gender}
+                                    {profile.sexualOrientation && ` • Orientation: ${profile.sexualOrientation}`}
+                                </span>
                             </div>
                         )}
 
                         {profile.hobbies && profile.hobbies.length > 0 && (
-                            <div className="flex items-center gap-2">
-                                <span>👾</span>
-                                <span className="capitalize">Hobbies: {profile.hobbies.join(', ')}</span>
+                            <div>
+                                <div className="flex items-center gap-2 mb-2">
+                                    <span>🎯</span>
+                                    <span className="font-medium">Hobbies & Interests:</span>
+                                </div>
+                                <div className="flex flex-wrap gap-2 ml-6">
+                                    {profile.hobbies.map((hobby, index) => (
+                                        <span
+                                            key={index}
+                                            className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm capitalize"
+                                        >
+                                            {formatHobby(hobby)}
+                                        </span>
+                                    ))}
+                                </div>
                             </div>
                         )}
 
                         {profile.description && (
-                            <div className="flex items-start gap-2 mt-4">
-                                <span className="mt-1">✌️</span>
-                                <span className="whitespace-pre-line">{profile.description}</span>
+                            <div className="mt-6">
+                                <div className="flex items-start gap-2 mb-2">
+                                    <span className="mt-1">✨</span>
+                                    <span className="font-medium">About Me:</span>
+                                </div>
+                                <div className="ml-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                    <p className="whitespace-pre-line">{profile.description}</p>
+                                </div>
                             </div>
                         )}
                     </div>

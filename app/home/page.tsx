@@ -1,295 +1,368 @@
-"use client";
+'use client'
+import * as React from "react"
+import { useState, useEffect } from "react"
+import { useSession, signIn, signOut } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button"
 
-import { useEffect, useState } from 'react';
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { Heading, SectionHeading } from "@/components/ui/heading";
-import { getImageUrl, getUserIdByEmail } from "@lib/actions";
-
-// Type definition for profile data
-interface ProfileData {
-    preferredName?: string;
-    gender?: string;
-    sexualOrientation?: string;
-    yearBorn?: number;
-    hobbies: string[];
-    description?: string;
-    photos: string[];
+// Custom property to be added to window object
+declare global {
+    interface Window {
+        HIDE_NAVBAR_FOR_TUTORIAL: boolean;
+    }
 }
 
-export default function ProfilePage() {
-    const { data: session, status } = useSession();
-    const router = useRouter();
-    const [profileComplete, setProfileComplete] = useState(false);
-    const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
-    const [profile, setProfile] = useState<ProfileData | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [imageUrls, setImageUrls] = useState<string[]>([]);
 
-    // Get user identifier - try email if userId not available
-    const getUserId = () => {
-        if (!session?.user) return null;
-        return session.user.userId || session.user.id || session.user.email;
-    };
+export default function TutorialPage() {
+    const { data: session, status } = useSession()
+    const router = useRouter()
 
-    // Calculate age from year born
-    const calculateAge = (yearBorn?: number) => {
-        if (!yearBorn) return null;
-        const currentYear = new Date().getFullYear();
-        return currentYear - yearBorn;
-    };
+    // State to track current image in each carousel
+    const [currentProfileImage, setCurrentProfileImage] = useState(0)
+    const [currentMatchImage, setCurrentMatchImage] = useState(0)
+    const [currentChatImage, setCurrentChatImage] = useState(0)
 
-    // Fetch profile data
+    // Set global flag to hide navbar on the tutorial page
     useEffect(() => {
-        const fetchProfileData = async () => {
-            if (status !== "authenticated") {
-                setLoading(false);
-                return;
-            }
+        if (typeof window !== 'undefined') {
+            window.HIDE_NAVBAR_FOR_TUTORIAL = true;
 
-            const userId = getUserId();
-            if (!userId) {
-                console.error("No user identifier found in session");
-                setLoading(false);
-                return;
-            }
-
-            try {
-                const response = await fetch(`/api/profile/${userId}`);
-
-                if (response.ok) {
-                    const profileData = await response.json();
-                    setProfile(profileData);
-
-                    // Check if profile is complete
-                    const requiredFields = ['preferredName', 'gender', 'description', 'yearBorn'];
-                    const hasRequiredFields = requiredFields.every(field => !!profileData[field]);
-
-                    setProfileComplete(hasRequiredFields);
-                } else {
-                    console.error("Failed to fetch profile data");
-                }
-            } catch (error) {
-                console.error('Error fetching profile data:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchProfileData();
-    }, [status, session]);
-
-    // Load images from Google Cloud
-    useEffect(() => {
-        const loadImagesFromCloud = async () => {
-            if (!session?.user?.email) return;
-
-            try {
-                const userId = await getUserIdByEmail(session.user.email);
-
-                // Try to load 6 images (indexes 0-5)
-                const urls = await Promise.all(
-                    Array(6).fill(null).map((_, index) =>
-                        getImageUrl(`${userId}/${index}`)
-                            .then(url => url)
-                            .catch(() => null) // Return null if image doesn't exist
-                    )
-                );
-
-                // Filter out any null values (images that couldn't be loaded)
-                const validUrls = urls.filter(url => url !== null) as string[];
-
-                // Update profile with these images
-                setImageUrls(validUrls);
-
-                if (profile) {
-                    setProfile({
-                        ...profile,
-                        photos: validUrls
-                    });
-                }
-            } catch (error) {
-                console.error("Error loading images from cloud:", error);
-            }
-        };
-
-        if (session?.user?.email) {
-            loadImagesFromCloud();
+            // Clean up when component unmounts
+            return () => {
+                window.HIDE_NAVBAR_FOR_TUTORIAL = false;
+            };
         }
-    }, [session, profile?.preferredName]); // Only run when profile is loaded
+    }, []);
 
-    // Navigate to next photo
-    const nextPhoto = () => {
-        if (!profile?.photos?.length) return;
-        setCurrentPhotoIndex((prev) => (prev === profile.photos.length - 1 ? 0 : prev + 1));
-    };
+    // Check if user should actually be on this page
+    useEffect(() => {
+        // If user is authenticated, check if they should see the tutorial
+        if (status === "authenticated") {
+            const checkProfile = async () => {
+                try {
+                    // Check if user has a profile
+                    const response = await fetch(`/api/profiles/`);
 
-    // Navigate to previous photo
-    const prevPhoto = () => {
-        if (!profile?.photos?.length) return;
-        setCurrentPhotoIndex((prev) => (prev === 0 ? profile.photos.length - 1 : prev - 1));
-    };
+                    if (response.ok) {
+                        // If user has a profile, redirect to matches
+                        console.log("User has profile, redirecting to matches");
+                        router.push('/matches');
+                        return;
+                    }
 
-    // Handle navigation to edit profile
-    const handleEditProfile = () => {
+                    // If user has seen tutorial but no profile, redirect to onboarding
+                    if (localStorage.getItem('cada_tutorial_seen') === 'true') {
+                        console.log("User has seen tutorial, redirecting to onboarding");
+                        router.push('/onboarding');
+                        return;
+                    }
+
+                    console.log("User is new, showing tutorial");
+                    // Otherwise, show tutorial to new users
+                } catch (error) {
+                    console.error("Error checking profile:", error);
+                }
+            };
+
+            checkProfile();
+        }
+    }, [status, router]);
+
+    // Profile images from public folder
+    const profileImages = [
+        "/profile1.png",
+        "/profile2.png",
+        "/profile3.png"
+    ]
+
+    // Match images (replace with actual image paths if you have them)
+    const matchImages = [
+        "/profile1.png", // Replace with actual match screenshots
+        "/profile2.png",
+        "/profile3.png"
+    ]
+
+    // Chat images (replace with actual image paths if you have them)
+    const chatImages = [
+        "/profile1.png", // Replace with actual chat screenshots
+        "/profile2.png",
+        "/profile3.png"
+    ]
+
+    // Navigation functions for profile images
+    const nextProfileImage = () => {
+        setCurrentProfileImage((prev) =>
+            prev === profileImages.length - 1 ? 0 : prev + 1
+        )
+    }
+
+    const prevProfileImage = () => {
+        setCurrentProfileImage((prev) =>
+            prev === 0 ? profileImages.length - 1 : prev - 1
+        )
+    }
+
+    // Navigation functions for match images
+    const nextMatchImage = () => {
+        setCurrentMatchImage((prev) =>
+            prev === matchImages.length - 1 ? 0 : prev + 1
+        )
+    }
+
+    const prevMatchImage = () => {
+        setCurrentMatchImage((prev) =>
+            prev === 0 ? matchImages.length - 1 : prev - 1
+        )
+    }
+
+    // Navigation functions for chat images
+    const nextChatImage = () => {
+        setCurrentChatImage((prev) =>
+            prev === chatImages.length - 1 ? 0 : prev + 1
+        )
+    }
+
+    const prevChatImage = () => {
+        setCurrentChatImage((prev) =>
+            prev === 0 ? chatImages.length - 1 : prev - 1
+        )
+    }
+
+    // Handle profile creation - now also marks tutorial as seen
+    const handleCreateProfile = () => {
+        // Mark tutorial as seen in localStorage
+        localStorage.setItem('cada_tutorial_seen', 'true');
+
+        // Redirect to profile creation
         router.push('/onboarding');
-    };
-
-    // Loading state
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center h-screen">
-                <p>Loading profile...</p>
-            </div>
-        );
     }
 
-    // No session state
-    if (status === "unauthenticated") {
-        return (
-            <div className="flex items-center justify-center h-screen p-4">
-                <div className="text-center mb-6">
-                    <h1 className="text-2xl font-bold">Sign in to view your profile</h1>
-                    <p className="text-gray-500 mt-2">You need to be logged in to see your profile</p>
-                </div>
-                <button
-                    className="px-4 py-2 bg-purple-600 text-white rounded-md"
-                    onClick={() => router.push('/')}
-                >
-                    Go to Login
-                </button>
-            </div>
-        );
+    // Handle sign out
+    const handleSignOut = () => {
+        signOut({ callbackUrl: '/' })
     }
 
-    // No profile state
-    if (!profile) {
+    // Still loading session
+    if (status === "loading") {
         return (
-            <div className="flex items-center justify-center h-screen p-4">
-                <div className="text-center mb-6">
-                    <h1 className="text-2xl font-bold">Complete Your Profile</h1>
-                    <p className="text-gray-500 mt-2">You haven't created a profile yet</p>
-                </div>
-                <button
-                    className="px-4 py-2 bg-purple-600 text-white rounded-md"
-                    onClick={() => router.push('/profile/edit')}
-                >
-                    Create Profile
-                </button>
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-600 mr-3"></div>
+                <p className="text-gray-600">Loading...</p>
             </div>
-        );
+        )
     }
 
-    // Determine which photos to show - use imageUrls if available, otherwise use profile.photos
-    const displayPhotos = imageUrls.length > 0 ? imageUrls : (profile.photos || []);
-    const hasPhotos = displayPhotos.length > 0;
-
-    return (
-        <div className="container mx-auto px-4 py-6 max-w-2xl">
-            {/* Header */}
-            <header className="mb-4 border-b pb-4">
-                <Heading>Profile</Heading>
-            </header>
-            {/* Edit profile button - bottom right, but not fixed */}
-            <div className="sticky bottom-4 flex justify-end">
-                <button
-                    onClick={handleEditProfile}
-                    className="bg-purple-600 text-white p-4 rounded-full shadow-lg"
-                >
-                    ✏️
-                </button>
+    // Not authenticated, show sign in page
+    if (!session) {
+        // Your existing sign-in UI component
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen p-8 pb-20 gap-8 sm:p-20 bg-gray-50 dark:bg-gray-900">
+                <main className="flex flex-col gap-6 items-center text-center">
+                    <h1 className="text-5xl font-bold">Welcome to CADA: Campus Dating</h1>
+                    <Button
+                        className="px-6 py-3 text-lg sm:text-xl font-semibold"
+                        onClick={() => signIn("google")}
+                    >
+                        Sign in with SJSU email
+                    </Button>
+                </main>
             </div>
-            <div className="flex flex-col">
-                {/* Profile photo */}
-                <div className="w-full mb-6">
-                    <div className="aspect-square rounded-lg overflow-hidden max-w-md mx-auto">
-                        {hasPhotos ? (
-                            <>
-                                <div className="relative w-full h-full">
-                                    <img
-                                        src={displayPhotos[currentPhotoIndex]}
-                                        alt={`Profile photo ${currentPhotoIndex + 1}`}
-                                        className="object-cover w-full h-full"
-                                        onError={(e) => {
-                                            const target = e.target as HTMLImageElement;
-                                            target.onerror = null;
-                                            target.src = 'https://via.placeholder.com/400x400?text=Image+Error';
-                                        }}
-                                    />
-                                </div>
+        )
+    }
 
-                                {/* Left/Right navigation for photos */}
-                                {displayPhotos.length > 1 && (
-                                    <>
-                                        <button
-                                            onClick={prevPhoto}
-                                            className="absolute left-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-40 text-white p-2 rounded-full"
-                                        >
-                                            ←
-                                        </button>
-                                        <button
-                                            onClick={nextPhoto}
-                                            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-40 text-white p-2 rounded-full"
-                                        >
-                                            →
-                                        </button>
-                                    </>
-                                )}
-                            </>
-                        ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-700">
-                                <p className="text-gray-500">No photos uploaded</p>
-                            </div>
-                        )}
-                    </div>
+    // Image carousel component - LARGER VERSION
+    const ImageCarousel = ({ images, currentIndex, onNext, onPrev, altText }) => (
+        <div className="relative rounded-lg overflow-hidden w-full max-w-xl mx-auto shadow-xl">
+            {/* Use a more prominent aspect ratio - closer to screenshot */}
+            <div className="aspect-[4/5]">
+                <img
+                    src={images[currentIndex]}
+                    alt={`${altText} screenshot ${currentIndex + 1}`}
+                    className="w-full h-full object-contain bg-gray-100 dark:bg-gray-800"
+                />
+            </div>
 
-                    {/* Carousel indicators */}
-                    {hasPhotos && displayPhotos.length > 1 && (
-                        <div className="flex justify-center mt-2 space-x-1">
-                            {displayPhotos.map((_, index) => (
-                                <div
-                                    key={index}
-                                    onClick={() => setCurrentPhotoIndex(index)}
-                                    className={`h-1 rounded-full cursor-pointer ${
-                                        index === currentPhotoIndex ? 'bg-purple-600 w-8' : 'bg-gray-300 w-1'
-                                    }`}
-                                />
-                            ))}
-                        </div>
-                    )}
-                </div>
+            {/* Larger navigation arrows */}
+            <button
+                onClick={onPrev}
+                className="absolute left-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white rounded-full p-3 transition-all shadow-lg"
+                aria-label="Previous image"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M15 18l-6-6 6-6" />
+                </svg>
+            </button>
 
-                {/* Profile info */}
-                <div className="pb-16">
-                    <h2 className="text-2xl font-bold mb-4">
-                        {profile.preferredName || session?.user?.name || "User"}
-                        {profile.yearBorn && ` (${calculateAge(profile.yearBorn)})`}
-                    </h2>
+            <button
+                onClick={onNext}
+                className="absolute right-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white rounded-full p-3 transition-all shadow-lg"
+                aria-label="Next image"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 18l6-6-6-6" />
+                </svg>
+            </button>
 
-                    <div className="space-y-4">
-                        {profile.gender && (
-                            <div className="flex items-center gap-2">
-                                <span>👤</span>
-                                <span className="capitalize">Gender and Sexual: {profile.gender} {profile.sexualOrientation && `• ${profile.sexualOrientation}`}</span>
-                            </div>
-                        )}
+            {/* Larger indicator dots */}
+            <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
+                {images.map((_, index) => (
+                    <div
+                        key={index}
+                        className={`h-3 rounded-full transition-all ${
+                            index === currentIndex
+                                ? "w-8 bg-white"
+                                : "w-3 bg-white bg-opacity-50"
+                        }`}
+                    />
+                ))}
+            </div>
 
-                        {profile.hobbies && profile.hobbies.length > 0 && (
-                            <div className="flex items-center gap-2">
-                                <span>👾</span>
-                                <span className="capitalize">Hobbies: {profile.hobbies.join(', ')}</span>
-                            </div>
-                        )}
-
-                        {profile.description && (
-                            <div className="flex items-start gap-2 mt-4">
-                                <span className="mt-1">✌️</span>
-                                <span className="whitespace-pre-line">{profile.description}</span>
-                            </div>
-                        )}
-                    </div>
-                </div>
+            {/* Image counter */}
+            <div className="absolute top-4 right-4 bg-black bg-opacity-60 text-white px-3 py-1 rounded-full text-sm">
+                {currentIndex + 1} / {images.length}
             </div>
         </div>
-    );
+    )
+
+    // Authenticated user sees tutorial
+    return (
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
+            {/* App header */}
+            <header className="fixed top-0 left-0 w-full bg-white dark:bg-gray-800 shadow-sm z-10 py-4">
+                <div className="container mx-auto px-4 flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                        <img src="/cada_heart.png" alt="CADA Logo" className="w-8 h-8" />
+                        <h1 className="text-xl font-bold">CADA</h1>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <span className="text-sm font-medium">{session.user?.name}</span>
+                        <img
+                            src={session.user?.image || "https://via.placeholder.com/40"}
+                            alt="Profile"
+                            className="w-8 h-8 rounded-full"
+                        />
+                        {/* Sign out button */}
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleSignOut}
+                            className="ml-2 text-sm"
+                        >
+                            Sign out
+                        </Button>
+                    </div>
+                </div>
+            </header>
+
+            {/* Main content with tutorial sections */}
+            <main className="container mx-auto px-4 pt-24 pb-16">
+                {/* Welcome section */}
+                <section className="text-center mb-16">
+                    <h1 className="text-4xl font-bold mb-6">Welcome to CADA</h1>
+                    <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                        Let's get you started with finding meaningful connections on campus!
+                    </p>
+                </section>
+
+                {/* Tutorial sections - REVISED FOR BIGGER IMAGES */}
+                <div className="space-y-32">
+                    {/* Step 1 */}
+                    <section className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                        <div className="order-2 lg:order-1">
+                            <h2 className="text-3xl font-bold mb-6">Create Your Profile</h2>
+                            <p className="text-xl text-gray-600 dark:text-gray-300 mb-6">
+                                Tell us about yourself and what you're looking for. This helps us find the perfect matches for you.
+                            </p>
+                            <ul className="list-disc pl-6 text-lg text-gray-600 dark:text-gray-300 space-y-3">
+                                <li>Share your interests and hobbies</li>
+                                <li>Upload your favorite photos</li>
+                                <li>Tell us what you're looking for</li>
+                            </ul>
+                        </div>
+                        <div className="order-1 lg:order-2">
+                            <ImageCarousel
+                                images={profileImages}
+                                currentIndex={currentProfileImage}
+                                onNext={nextProfileImage}
+                                onPrev={prevProfileImage}
+                                altText="Profile Creation"
+                            />
+                        </div>
+                    </section>
+
+                    {/* Step 2 */}
+                    <section className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                        <div>
+                            <ImageCarousel
+                                images={matchImages}
+                                currentIndex={currentMatchImage}
+                                onNext={nextMatchImage}
+                                onPrev={prevMatchImage}
+                                altText="Matching"
+                            />
+                        </div>
+                        <div>
+                            <h2 className="text-3xl font-bold mb-6">Find Your Matches</h2>
+                            <p className="text-xl text-gray-600 dark:text-gray-300 mb-6">
+                                Our algorithm helps you connect with people who share your interests and preferences.
+                            </p>
+                            <ul className="list-disc pl-6 text-lg text-gray-600 dark:text-gray-300 space-y-3">
+                                <li>Browse potential matches</li>
+                                <li>See compatibility ratings</li>
+                                <li>Connect with people you're interested in</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    {/* Step 3 */}
+                    <section className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                        <div className="order-2 lg:order-1">
+                            <h2 className="text-3xl font-bold mb-6">Chat and Connect</h2>
+                            <p className="text-xl text-gray-600 dark:text-gray-300 mb-6">
+                                Start meaningful conversations with your matches and build connections.
+                            </p>
+                            <ul className="list-disc pl-6 text-lg text-gray-600 dark:text-gray-300 space-y-3">
+                                <li>Send messages to your matches</li>
+                                <li>Share photos and experiences</li>
+                                <li>Arrange to meet in person</li>
+                            </ul>
+                        </div>
+                        <div className="order-1 lg:order-2">
+                            <ImageCarousel
+                                images={chatImages}
+                                currentIndex={currentChatImage}
+                                onNext={nextChatImage}
+                                onPrev={prevChatImage}
+                                altText="Chat"
+                            />
+                        </div>
+                    </section>
+                </div>
+
+                {/* Call to action */}
+                <div className="text-center mt-32 bg-white dark:bg-gray-800 p-12 rounded-xl shadow-md">
+                    <h2 className="text-4xl font-bold mb-6">Ready to get started?</h2>
+                    <p className="text-xl text-gray-600 dark:text-gray-300 mb-10 max-w-2xl mx-auto">
+                        Create your profile now and start connecting with other students on campus!
+                    </p>
+                    <Button
+                        onClick={handleCreateProfile}
+                        className="px-10 py-6 text-xl bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-full shadow-lg"
+                    >
+                        Create Your Profile
+                    </Button>
+                </div>
+            </main>
+
+            {/* Footer with explicit sign out option */}
+            <footer className="bg-white dark:bg-gray-800 py-6 shadow-inner mt-15">
+                <div className="container mx-auto px-4 text-center">
+                    <p className="text-gray-600 dark:text-gray-300 mb-4">© 2024 CADA. Campus Dating App. All rights reserved.</p>
+                </div>
+            </footer>
+
+            {/* Hidden div to ensure the navbar doesn't show */}
+            <div id="hide-navbar-for-tutorial" className="hidden"></div>
+        </div>
+    )
 }
