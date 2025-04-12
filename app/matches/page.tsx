@@ -43,11 +43,13 @@ export default function MessagesPage() {
 
         {/* Right Side: Profile Card */}
         <div className="w-full max-w-md flex justify-center items-start mt-14">
-          <div className="relative w-[350px] h-[550px] rounded-2xl overflow-hidden shadow-xl bg-black centered">
+          <div className="relative w-[550px] h-[550px] rounded-2xl overflow-hidden shadow-xl bg-black centered">
             <Image
               src="https://plus.unsplash.com/premium_photo-1690407617542-2f210cf20d7e?q=80&w=2417&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
               alt={profile.name}
-              className="w-full h-full object-cover"
+              fill
+              sizes = "350px"
+              className="object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
             <div className="absolute bottom-6 left-6 right-6 text-white flex flex-col gap-1">

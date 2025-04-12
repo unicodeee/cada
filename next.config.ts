@@ -1,12 +1,23 @@
-
-
-module.exports = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
     images: {
         domains: ['storage.googleapis.com'],
         remotePatterns: [
             {
+                protocol: "https",
+                hostname: "plus.unsplash.com",
+            },
+            {
+                protocol: "https",
+                hostname: "unsplash.com",
+            },
+            {
+                protocol: "https",
+                hostname: "images.unsplash.com",
+            },
+            {
                 protocol: 'https',
-                hostname: 'lh3.googleusercontent.com', // because using Image, next needs to know the images come from a given domain
+                hostname: 'lh3.googleusercontent.com',
                 port: '',
                 pathname: '/**',
                 search: '',
@@ -14,3 +25,5 @@ module.exports = {
         ],
     },
 }
+
+module.exports = nextConfig;
