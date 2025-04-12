@@ -1,7 +1,7 @@
 'use client'
 import * as React from "react"
 import { useState, useEffect } from "react"
-import { useSession, signIn, signOut } from "next-auth/react"
+import { useSession, signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 
@@ -103,11 +103,6 @@ export default function TutorialPage() {
         router.push('/onboarding');
     }
 
-    // Handle sign out
-    const handleSignOut = () => {
-        signOut({ callbackUrl: '/' })
-    }
-
     // Still loading session
     if (status === "loading") {
         return (
@@ -190,38 +185,11 @@ export default function TutorialPage() {
         </div>
     )
 
-    // Authenticated user sees tutorial
+    // Authenticated user sees tutorial - Remove the header since we now have a global header
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
-            {/* App header */}
-            <header className="fixed top-0 left-0 w-full bg-white dark:bg-gray-800 shadow-sm z-10 py-4">
-                <div className="container mx-auto px-4 flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                        <img src="/cada_heart.png" alt="CADA Logo" className="w-8 h-8" />
-                        <h1 className="text-xl font-bold">CADA</h1>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <span className="text-sm font-medium">{session.user?.name}</span>
-                        <img
-                            src={session.user?.image || "https://via.placeholder.com/40"}
-                            alt="Profile"
-                            className="w-8 h-8 rounded-full"
-                        />
-                        {/* Sign out button */}
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={handleSignOut}
-                            className="ml-2 text-sm"
-                        >
-                            Sign out
-                        </Button>
-                    </div>
-                </div>
-            </header>
-
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20 pt-20">
             {/* Main content with tutorial sections */}
-            <main className="container mx-auto px-4 pt-24 pb-16">
+            <main className="container mx-auto px-4 pt-4 pb-16">
                 {/* Welcome section */}
                 <section className="text-center mb-16">
                     <h1 className="text-4xl font-bold mb-6">Welcome to CADA</h1>
@@ -326,24 +294,6 @@ export default function TutorialPage() {
                     <p className="text-gray-600 dark:text-gray-300 mb-4">© 2024 CADA. Campus Dating App. All rights reserved.</p>
                 </div>
             </footer>
-
-            {/* Bottom navigation bar */}
-            <div className="fixed bottom-0 left-0 w-full bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 py-3 px-4">
-                <div className="flex justify-around max-w-md mx-auto">
-                    <button className="flex flex-col items-center text-purple-600">
-                        <span className="text-xs">Home</span>
-                    </button>
-                    <button className="flex flex-col items-center text-gray-500">
-                        <span className="text-xs">Matches</span>
-                    </button>
-                    <button className="flex flex-col items-center text-gray-500">
-                        <span className="text-xs">Chats</span>
-                    </button>
-                    <button className="flex flex-col items-center text-gray-500">
-                        <span className="text-xs">Profile</span>
-                    </button>
-                </div>
-            </div>
         </div>
     )
 }
