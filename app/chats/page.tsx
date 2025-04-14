@@ -18,6 +18,7 @@ import {Avatar, AvatarFallback, AvatarImage} from "@components/ui/avatar";
 import {ScrollArea, ScrollBar} from "@components/ui/scroll-area";
 import {Separator} from "@components/ui/separator";
 import {Badge} from "@components/ui/badge";
+import {useSession} from "next-auth/react";
 
 
 
@@ -85,8 +86,9 @@ const messageSchema = z.object({
 });
 
 
-export default function Page() {
+export default function ChatPage() {
     // const { data: session } = useSession();
+    const { data: session } = useSession();
     const router = useRouter();
     const [value, setValue] = useState("");
     const [messages, setMessages] = useState<z.infer<typeof messageSchema>[]>([]);
@@ -95,9 +97,9 @@ export default function Page() {
 
 
 
-    const userId = "3b58f3c7-d89e-4536-97c4-b4a9536ce54d";
+    const userId = session?.user.userId as string;
 
-    const match = "items";
+    const match = "matches/3b58f3c7-d89e-4536-97c4-b4a9536ce54e";
 
     useEffect(() => {
         const fetchMessages = async () => {
@@ -152,11 +154,6 @@ export default function Page() {
 
             await addDoc(collection(db, match), messageToSend.data);
             toast.success(`Sent ${messageToSend.data} uploaded!`); // to do
-
-            // fake message
-            messageToSend.data.message  = "I LOVE YOU BABE!"
-            messageToSend.data.userId = "3b58f3c7-d89e-4536-97c4-b4a9536ce54c";
-            await addDoc(collection(db, match), messageToSend.data);
 
         } catch (e) {
             console.log(e);
