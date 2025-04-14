@@ -1,7 +1,7 @@
 "use client"
 
-import React, {useEffect, useState} from 'react';
-import {addDoc, collection, getDocs, limit, orderBy, query, Timestamp} from "firebase/firestore"
+import React, {useEffect, useRef, useState} from 'react';
+import {addDoc, collection, getDocs, limit, orderBy, query, Timestamp, onSnapshot} from "firebase/firestore"
 
 import db from "@lib/firestore"
 import z from "zod";
@@ -36,6 +36,9 @@ export default function Page() {
     const [value, setValue] = useState("");
     const [messages, setMessages] = useState<z.infer<typeof messageSchema>[]>([]);
 
+    const bottomRef = useRef<HTMLDivElement>(null);
+
+
 
     const userId = "3b58f3c7-d89e-4536-97c4-b4a9536ce54d";
 
@@ -46,22 +49,20 @@ export default function Page() {
             try {
                 const matchRef = collection(db, match);
 
-                const q = query(matchRef, orderBy("createdAt", "desc"), limit(25));
+                const q = query(matchRef, orderBy("createdAt", "desc"), limit(50));
 
+                const unsubscribe = onSnapshot(q, (snapshot) => {
+                    const messages = snapshot.docs.map(doc => {
+                        const result = messageSchema.safeParse(doc.data());
+                        return result.success ? result.data : null;
+                    }).reverse().filter((msg): msg is z.infer<typeof messageSchema> => msg !== null);
 
-                const snapshot = await getDocs(q);
-                // const snapshot = await getDocs(collection(db, match));
+                    setMessages(messages);
+                }, (error) => {
+                    console.error("Error listening to messages:", error);
+                });
+                return unsubscribe;
 
-
-
-                const validMessages = snapshot.docs.map(doc => {
-                    const result = messageSchema.safeParse(doc.data());
-                    return result.success ? result.data : null;
-                }).filter((msg): msg is z.infer<typeof messageSchema> => msg !== null);
-
-                console.log("validMessages", validMessages);
-
-                setMessages(validMessages);
             } catch (e) {
                 console.error(e);
             }
@@ -92,6 +93,7 @@ export default function Page() {
         try {
             setMessages(prev => [...prev, messageToSend.data]);
             setValue("");
+            bottomRef.current?.scrollIntoView({ behavior: "smooth" });
 
             await addDoc(collection(db, match), messageToSend.data);
             toast.success(`Sent ${messageToSend.data} uploaded!`); // to do
@@ -150,6 +152,8 @@ export default function Page() {
                         <TextBubbleLeft key={index}>{msg.message}</TextBubbleLeft>
                     )
                 )}
+
+                <div ref={bottomRef}></div>
             </div>
 
             {/* Input Area */}
