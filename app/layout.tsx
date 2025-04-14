@@ -35,7 +35,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
     );
 }
 
-function ConditionalFooter() {
+    function ConditionalFooter() {
     const { status } = useSession();
     const pathname = usePathname();
     const [showFooter, setShowFooter] = useState(false);

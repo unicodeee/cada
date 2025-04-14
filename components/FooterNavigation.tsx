@@ -79,20 +79,6 @@ export default function FooterNavigation() {
 
     return (
         <footer className="fixed bottom-0 left-0 right-0 border-t bg-white dark:bg-gray-800 py-3 flex justify-around items-center text-xs z-50">
-            {/* Home */}
-            <NavigationMenu>
-                <NavigationMenuList>
-                    <NavigationMenuItem>
-                        <Link href="/" legacyBehavior passHref>
-                            <NavigationMenuLink
-                                className={`${navigationMenuTriggerStyle()} ${isActive('/')}`}
-                            >
-                                Home
-                            </NavigationMenuLink>
-                        </Link>
-                    </NavigationMenuItem>
-                </NavigationMenuList>
-            </NavigationMenu>
 
             {/* Matches */}
             <NavigationMenu>
