@@ -99,7 +99,7 @@ export default function ChatPage() {
 
     const userId = session?.user.userId as string;
 
-    const match = "matches/3b58f3c7-d89e-4536-97c4-b4a9536ce54e";
+    const match = "matches/chats/3b58f3c7-d89e-4536-97c4-b4a9536ce54e";
 
     useEffect(() => {
         const fetchMessages = async () => {
