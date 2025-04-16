@@ -36,6 +36,7 @@ async function getProfile(userId: string, res: NextApiResponse) {
         if (!profile) {
             return res.status(404).json({ message: "No profile found" });
         }
+        console.log("profile: ", profile);
         return res.status(200).json(profile);
     } catch (error) {
         return res.status(500).json({ message: "Server error", error });
