@@ -99,7 +99,7 @@ export default function ChatPage() {
 
     const userId = session?.user.userId as string;
 
-    const match = "matches/3b58f3c7-d89e-4536-97c4-b4a9536ce54e";
+    const match = "matches/chats/3b58f3c7-d89e-4536-97c4-b4a9536ce54e";
 
     useEffect(() => {
         const fetchMessages = async () => {
@@ -285,7 +285,7 @@ export default function ChatPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="start" side="top">
                             <DropdownMenuItem className="text-lg py-2" onClick={() => handleNavigation('/calendar')}>📚 Study Buddy Mode</DropdownMenuItem>
-                            <DropdownMenuItem className="text-lg py-2" onClick={() => handleNavigation('/eventpage')}>🏫 Campus Social Events</DropdownMenuItem>
+                            <DropdownMenuItem className="text-lg py-2" onClick={() => window.open('https://events.sjsu.edu/calendar')}>🏫 Campus Social Events</DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
 
