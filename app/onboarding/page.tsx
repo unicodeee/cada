@@ -3,7 +3,7 @@ import React, {useState, useEffect} from "react";
 import {useSession} from "next-auth/react";
 import {Input, LargeInput} from "@components/ui/input";
 import {Button1} from "@components/ui/button";
-import {allGenders, allSexualOrientations} from "@lib/data";
+import {allGenders, allHobbies, allSexualOrientations} from "@lib/data";
 import {useRouter} from "next/navigation";
 import { toast } from "@/components/ui/use-toast";
 import { SectionHeading } from "@/components/ui/heading";
@@ -20,6 +20,8 @@ export default function Onboarding(){
         gender: "",
         dayBorn: "",
         monthBorn: "",
+        hobbies: [],
+        photos: [],
         yearBorn: "",
         sexualOrientation: "",
         genderPreference: ""
@@ -69,13 +71,17 @@ export default function Onboarding(){
                         yearBorn = date.getFullYear().toString();
                     }
 
+                    console.log("Fetkjhkjjhkhjkhkjhkjched profile data:", profileData);
+
                     setFormData({
                         preferredName: profileData.preferredName || "",
                         major: profileData.major || "",
                         gender: profileData.gender || "",
+                        hobbies: profileData.hobbies || [],
                         dayBorn,
                         monthBorn,
                         yearBorn,
+                        photos: profileData.photos || [],
                         sexualOrientation: profileData.sexualOrientation || "",
                         genderPreference: profileData.genderPreference || ""
                     });
@@ -285,8 +291,8 @@ export default function Onboarding(){
                 genderPreference: formData.genderPreference,
                 sexualOrientation: formData.sexualOrientation || null,
                 dateOfBirth: dateOfBirth,
-                hobbies: [],
-                photos: []
+                hobbies: formData.hobbies,
+                photos: formData.photos || []
             };
 
             console.log("Submitting profile data:", profileData);

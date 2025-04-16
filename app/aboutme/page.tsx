@@ -49,6 +49,8 @@ export default function AboutPage() {
                         hobbies: Array.isArray(profileData.hobbies) ? profileData.hobbies : [],
                         description: profileData.description || ""
                     });
+
+                    console.log("Profile data set:", formData.hobbies, formData)
                 } else {
                     // If 404, it's a new user without a profile yet
                     if (response.status !== 404) {
