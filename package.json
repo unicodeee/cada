@@ -2,10 +2,6 @@
   "name": "cada-app",
   "version": "0.1.0",
   "private": true,
-  "prisma": {
-    "seed": "ts-node -r tsconfig-paths/register prisma/seed.ts"
-  },
-  "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
@@ -31,7 +27,6 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
-    "firebase": "^11.6.0",
     "formidable": "^3.5.2",
     "framer-motion": "^12.6.3",
     "input-otp": "^1.4.2",
@@ -55,18 +50,16 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@faker-js/faker": "^9.6.0",
     "@types/formidable": "^3.4.5",
-    "@types/node": "^20.17.30",
+    "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/uuid": "^10.0.0",
     "eslint": "^9",
     "eslint-config-next": "15.1.7",
     "postcss": "^8",
-    "prisma": "^6.5.0",
+    "prisma": "^6.6.0",
     "tailwindcss": "^3.4.1",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.8.3"
+    "typescript": "^5"
   }
 }
