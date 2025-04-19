@@ -3,6 +3,7 @@
 import {Storage} from "@google-cloud/storage";
 import process from "node:process";
 import {prisma} from "@/prisma/prisma";
+import {profileSchema, profileSchema2} from "@/lib/formdata";
 
 
 const storage = new Storage({
@@ -16,6 +17,23 @@ const storage = new Storage({
 const bucket = storage.bucket(process.env.GC_BUCKET!);
 
 
+
+export const getProfile = async (userId: string) => {
+    const profile = await prisma.profile.findUnique({
+        where: { userId }
+    });
+
+    if (!profile) {
+        throw new Error("profile bad")
+    }
+
+
+
+   return {
+        ...profile,
+       avatarUrl: profile.photos[0] || null
+   };
+}
 
 export const getSignedUrl = async (fileName: string, fileType: string) => {
     // I am not including the key in the github repo, but this key goes in the root of the project.
