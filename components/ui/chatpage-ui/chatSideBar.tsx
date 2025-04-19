@@ -20,7 +20,7 @@ export const Sidebar = ({ matchProfiles, myProfile }: { matchProfiles?: MatchPro
 
             <div className="flex items-center gap-4 mb-4">
                 <Avatar>
-                    <AvatarImage src={myProfile?.avatarUrl} />
+                    <AvatarImage src={myProfile?.avatar} />
                     <AvatarFallback>A</AvatarFallback>
                 </Avatar>
                 <div>
@@ -37,7 +37,7 @@ export const Sidebar = ({ matchProfiles, myProfile }: { matchProfiles?: MatchPro
                     {matchProfiles.map((p, i) => (
                         <div key={i} className="relative">
                             <Avatar className="w-12 h-12">
-                                <AvatarImage src={p.avatarUrl} />
+                                <AvatarImage src={p.avatar} />
                                 <AvatarFallback>T</AvatarFallback>
                             </Avatar>
                             <span className="absolute bottom-0 right-0 h-3 w-3 bg-purple-500 rounded-full border-2 border-white" />
@@ -55,7 +55,7 @@ export const Sidebar = ({ matchProfiles, myProfile }: { matchProfiles?: MatchPro
                     <div key={i} className="flex justify-between items-start">
                         <div className="flex gap-3 items-start">
                             <Avatar>
-                                <AvatarImage src={user.avatarUrl} />
+                                <AvatarImage src={user.avatar} />
                                 <AvatarFallback>T</AvatarFallback>
                             </Avatar>
                             <div>

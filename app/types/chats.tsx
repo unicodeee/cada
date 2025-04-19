@@ -1,6 +1,6 @@
 
 export type MatchProfile = {
-    avatarUrl: string;
+    avatar: string;
     name: string;
     latestMessage: string;
     createdAt: string;
@@ -8,7 +8,7 @@ export type MatchProfile = {
 };
 
 export type MyProfile = {
-    avatarUrl: string | null;
+    avatar: string | null;
     preferredName?: string | null;
 };
 

@@ -59,9 +59,6 @@ export default function ChatPage() {
 
 
 
-    const [matches, setMatches] = useState<z.infer<typeof matchesSchema>[]>([]);
-
-
 
 
     const userId = session?.user.userId as string;
@@ -77,7 +74,7 @@ export default function ChatPage() {
                     throw new Error('Failed fetching matches');
                 }
                 const data = await response.json();
-                setMatches(data);
+                setMatchProfiles(data);
 
             } catch (error) {
                 console.error('Error uploading photo:', error);
