@@ -50,8 +50,11 @@ export const profileSchemaAboutMe = z.object({
     description: z.string(),
 })
 
+
 // Profile schema validation - this is the main one used in the API
 export const profileSchema = z.object({
+    id: z.string().uuid().optional(),
+    userId: z.string().uuid().optional(),
     preferredName: z.string().optional().nullable(),
     major: z.string().optional().nullable(),
     gender: GenderEnum.optional().nullable(),

@@ -1,7 +1,7 @@
 "use client"
 
 import React, {useEffect, useRef, useState} from 'react';
-import {addDoc, collection, getDocs, limit, orderBy, query, Timestamp, onSnapshot} from "firebase/firestore"
+import {addDoc, collection, limit, onSnapshot, orderBy, query, Timestamp} from "firebase/firestore"
 
 import db from "@lib/firestore"
 import z from "zod";
@@ -13,62 +13,13 @@ import {useRouter} from "next/navigation";
 import {Input} from "@components/ui/input";
 import {Button} from "@components/ui/button";
 import {toast} from "sonner";
-import Image from "next/image";
-import {Avatar, AvatarFallback, AvatarImage} from "@components/ui/avatar";
-import {ScrollArea, ScrollBar} from "@components/ui/scroll-area";
-import {Separator} from "@components/ui/separator";
-import {Badge} from "@components/ui/badge";
 import {useSession} from "next-auth/react";
+import {getProfile} from "@lib/actions";
+import {Sidebar} from "@components/ui/chatpage-ui/chatSideBar";
+import {MatchProfile, MyProfile} from "@/app/types/chats";
 
 
-
-const users = [
-    {
-        name: "Charlotte",
-        img: "https://lh3.googleusercontent.com/a/ACg8ocI3e5J3Hqiq4V0GRCL26yXMle8N0FhJ7MLlaDOumedDJ80LnA=s96-c",
-        message: "Haha, I'm a perfect match 🫣🫣",
-        time: "09:41",
-        unread: 1,
-    },
-    {
-        name: "Aurora",
-        img: "/avatars/aurora.jpg",
-        message: "Wow, this is really epic 👍",
-        time: "08:54",
-        unread: 3,
-    },
-    {
-        name: "Victoria",
-        img: "/avatars/victoria.jpg",
-        message: "Thank you so much andrew 🔥",
-        time: "01:27",
-    },
-    {
-        name: "Emilia",
-        img: "https://lh3.googleusercontent.com/a/ACg8ocI3e5J3Hqiq4V0GRCL26yXMle8N0FhJ7MLlaDOumedDJ80LnA=s96-c",
-        message: "Wow love it! ❤️",
-        time: "Yesterday",
-        unread: 2,
-    },
-    {
-        name: "Natalie",
-        img: "https://lh3.googleusercontent.com/a/ACg8ocI3e5J3Hqiq4V0GRCL26yXMle8N0FhJ7MLlaDOumedDJ80LnA=s96-c",
-        message: "I know... I'm trying to get the ...",
-        time: "Yesterday",
-    },
-    {
-        name: "Scarlett",
-        img: "https://lh3.googleusercontent.com/a/ACg8ocI3e5J3Hqiq4V0GRCL26yXMle8N0FhJ7MLlaDOumedDJ80LnA=s96-c",
-        message: "It's strong not just fabulous! 😌",
-        time: "Dec 20, 2023",
-    },
-    {
-        name: "Caroline",
-        img: "https://lh3.googleusercontent.com/a/ACg8ocI3e5J3Hqiq4V0GRCL26yXMle8N0FhJ7MLlaDOumedDJ80LnA=s96-c",
-        message: "Sky blue. Trying it now! 😂",
-        time: "Dec 19, 2023",
-    },
-];
+const FallbackAVATAR = "/cada_heart.png";
 
 
 const messageSchema = z.object({
@@ -85,6 +36,14 @@ const messageSchema = z.object({
     ),
 });
 
+const matchesSchema = z.object({
+    matchId: z.string().optional(),
+    userId: z.string().optional(),
+    name: z.string().optional(),
+    avatar: z.string().optional(),
+    profile: z.string().optional(),
+})
+
 
 export default function ChatPage() {
     // const { data: session } = useSession();
@@ -92,8 +51,16 @@ export default function ChatPage() {
     const router = useRouter();
     const [value, setValue] = useState("");
     const [messages, setMessages] = useState<z.infer<typeof messageSchema>[]>([]);
+    
+    const [matchProfiles, setMatchProfiles] = useState<MatchProfile[]>([]);
+    const [myProfile, setMyProfile] = useState<MyProfile>();
 
     const bottomRef = useRef<HTMLDivElement>(null);
+
+
+
+    const [matches, setMatches] = useState<z.infer<typeof matchesSchema>[]>([]);
+
 
 
 
@@ -102,6 +69,21 @@ export default function ChatPage() {
     const match = "matches/chats/3b58f3c7-d89e-4536-97c4-b4a9536ce54e";
 
     useEffect(() => {
+        
+        const fetchMatches = async () => {
+            try {
+                const response = await fetch('/api/matches');
+                if (!response.ok) {
+                    throw new Error('Failed fetching matches');
+                }
+                const data = await response.json();
+                setMatches(data);
+
+            } catch (error) {
+                console.error('Error uploading photo:', error);
+                throw error;
+            }
+        }
         const fetchMessages = async () => {
             try {
                 const matchRef = collection(db, match);
@@ -124,8 +106,35 @@ export default function ChatPage() {
                 console.error(e);
             }
         };
+        fetchMatches();
         fetchMessages();
     }, []);
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const data = await getProfile(userId);
+
+                console.log("data",data);
+                if (!data) {
+                    throw new Error('Failed fetching profile');
+                }
+                setMyProfile(data);
+            } catch (err: unknown) {
+                if (err instanceof Error) {
+                    toast.error(err.message);
+                } else {
+                    toast.error('Something went wrong');
+                }
+            }
+        };
+
+        if (userId) {
+            fetchProfile();
+            console.log("myProfile", myProfile);
+            console.log("userId", userId);
+        }
+    }, [userId]);
 
 
 
@@ -168,85 +177,12 @@ export default function ChatPage() {
 
 
     return <div className="flex h-screen w-full overflow-hidden">
+        {matchProfiles && myProfile ?
+            <Sidebar matchProfiles={matchProfiles} myProfile={myProfile} />
+        : myProfile ?
+                <Sidebar myProfile={myProfile} />
+                : <div>No match found</div>}
 
-        {/*<form onSubmit={(e) => handleSubmit(e)}>*/}
-
-
-        {/*    <input*/}
-        {/*        type={"text"}*/}
-        {/*        value={value}*/}
-        {/*        onChange={(e) => {setValue(e.target.value)}}*/}
-        {/*        placeholder={"Enter a value"}*/}
-        {/*    />*/}
-
-        {/*    <button type="submit">Submit</button>*/}
-
-        {/*</form>*/}
-
-
-
-        <div className="w-[400px] border-r p-4 overflow-y-auto">
-            {/* Header */}
-            <div className="items-center gap-2 mb-2">
-                <Image src="/cada_heart.png" alt="Heart" width={48} height={48} className="w-12 h-12" />
-            </div>
-            <div className="flex items-center gap-4 mb-4">
-                <Avatar>
-                    <AvatarImage src="https://lh3.googleusercontent.com/a/ACg8ocI3e5J3Hqiq4V0GRCL26yXMle8N0FhJ7MLlaDOumedDJ80LnA=s96-c" />
-                    <AvatarFallback>A</AvatarFallback>
-                </Avatar>
-                <div>
-                    <h1 className="text-2xl font-bold">Andrew</h1>
-                    <p className="text-sm text-gray-500">Now Active</p>
-                </div>
-            </div>
-
-            {/* Scrollable Avatars */}
-            <ScrollArea className="mb-4">
-                <div className="flex space-x-4 pb-2">
-                    {users.map((user, i) => (
-                        <div key={i} className="relative">
-                            <Avatar className="w-12 h-12">
-                                <AvatarImage src={user.img} />
-                                <AvatarFallback>{user.name[0]}</AvatarFallback>
-                            </Avatar>
-                            <span className="absolute bottom-0 right-0 h-3 w-3 bg-purple-500 rounded-full border-2 border-white" />
-                        </div>
-                    ))}
-                </div>
-                <ScrollBar orientation="horizontal" />
-            </ScrollArea>
-
-            <Separator className="mb-4" />
-
-            {/* Message List */}
-            <div className="space-y-4">
-                {users.map((user, i) => (
-                    <div key={i} className="flex justify-between items-start">
-                        <div className="flex gap-3 items-start">
-                            <Avatar>
-                                <AvatarImage src={user.img} />
-                                <AvatarFallback>{user.name[0]}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                                <h2 className="font-semibold">{user.name}</h2>
-                                <p className="text-sm text-gray-600 truncate max-w-[160px]">
-                                    {user.message}
-                                </p>
-                            </div>
-                        </div>
-                        <div className="text-right flex flex-col items-end gap-1">
-                            <p className="text-xs text-gray-400">{user.time}</p>
-                            {user.unread && (
-                                <Badge className="rounded-full bg-purple-600 text-white h-5 w-5 p-0 text-xs flex items-center justify-center">
-                                    {user.unread}
-                                </Badge>
-                            )}
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
 
 
 
