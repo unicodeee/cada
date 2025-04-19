@@ -26,14 +26,42 @@ export const getProfile = async (userId: string) => {
     if (!profile) {
         throw new Error("profile bad")
     }
-
-
-
+    const result = await loadImagesFromStorage(userId);
+    if (!result) {
+        throw new Error("Avatar not found for user: ")
+    }
    return {
         ...profile,
-       avatarUrl: profile.photos[0] || null
+       avatar: result || null
    };
 }
+
+
+
+const loadImagesFromStorage = async (userId: string) => {
+    try {
+        // Try to load 6 images (indexes 0-5)
+        const urls = await Promise.all(
+            Array(6).fill(null).map((_, index) =>
+                getImageUrl(`${userId}/${index}`)
+                    .then(url => url)
+                    .catch(() => null) // Return null if image doesn't exist
+            )
+        );
+        // Filter out any null values (images that couldn't be loaded)
+        const validUrls = urls.filter(url => url !== null) as string[];
+        if (validUrls.length > 0) {
+            return validUrls[0]; // first url only for avatar
+        } else {
+            return null;
+        }
+    } catch (error) {
+        console.error("Error loading images:", error);
+        throw error;
+    }
+};
+
+
 
 export const getSignedUrl = async (fileName: string, fileType: string) => {
     // I am not including the key in the github repo, but this key goes in the root of the project.
