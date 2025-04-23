@@ -36,6 +36,73 @@ export const getProfile = async (userId: string) => {
 }
 
 
+export const getProfilesForMatching = async (userId: string) => {
+    const myProfile = await prisma.profile.findUnique({
+        where: { userId },
+    });
+
+    if (!myProfile || !myProfile.genderPreference) {
+        throw new Error("No profile found or gender preference is not set");
+    }
+
+// Get the list of user IDs the current user has swiped
+    const swipedUsers = await prisma.swipe.findMany({
+        where: { swiperId: userId },
+        select: { swipedId: true },
+    });
+    const swipedIds = swipedUsers.map((s) => s.swipedId);
+
+// Get the list of user IDs the current user has matched with
+    const matchedUsers = await prisma.match.findMany({
+        where: {
+            OR: [{ firstUserId: userId }, { secondUserId: userId }],
+        },
+        select: {
+            firstUserId: true,
+            secondUserId: true,
+        },
+    });
+    const matchedIds = matchedUsers.flatMap((m) =>
+        m.firstUserId === userId ? [m.secondUserId] : [m.firstUserId]
+    );
+
+    const excludeIds = [...new Set([...swipedIds, ...matchedIds, userId])];
+
+// Get profiles based on gender preference
+    const profiles = await prisma.profile.findMany({
+        where: {
+            gender: myProfile.genderPreference,
+            userId: {
+                notIn: excludeIds,
+            },
+        },
+        include: {
+            user: true,
+        },
+    });
+
+// Load avatars for each profile
+    const profilesWithAvatar = await Promise.all(
+        profiles.map(async (profile) => {
+
+            let avatar: string | null;
+            if (process.env.NODE_ENV == "development" ) {
+                avatar = await loadFirstImageFromStorage(userId);
+            }
+            else {
+                avatar = await loadFirstImageFromStorage(profile.userId);
+            }
+
+            return {
+                ...profile,
+                avatar: avatar || null,
+            };
+        })
+    );
+
+    return profilesWithAvatar;
+}
+
 
 const loadFirstImageFromStorage = async (userId: string): Promise<string | null> => {
     try {
