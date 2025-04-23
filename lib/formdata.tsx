@@ -83,3 +83,19 @@ export const swipeSchema = z.object({
     swipedId: z.string().uuid(),
     swipeRight: z.boolean(),
 })
+
+export const profileMatchPageDataSchema = z.object({
+    avatar: z.string().url().optional(),
+    userId: z.string().uuid().optional(),
+    preferredName: z.string().optional().nullable(),
+    major: z.string().optional().nullable(),
+    gender: GenderEnum.optional().nullable(),
+    hobbies: z.array(z.string()).optional().default([]),
+    description: z.string().optional().nullable(),
+    sexualOrientation: SexualOrientationEnum.optional().nullable(),
+    dateOfBirth: z.union([   // auto transform to a Date object from request
+        z.string().transform((val) => new Date(val)),
+        z.date()
+    ]).optional().nullable(),
+    photos: z.array(z.string()).optional().default([]),
+})
