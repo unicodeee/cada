@@ -1,5 +1,6 @@
 
 export type MatchProfile = {
+    matchId: string;
     avatar: string;
     name: string;
     latestMessage: string;
@@ -13,6 +14,7 @@ export type MyProfile = {
 };
 
 export type SidebarProps = {
-    matchProfiles: MatchProfile[];
-    myProfile: MyProfile | null;
+    matchProfiles?: MatchProfile[] | null;
+    myProfile: MyProfile;
+    onClick?: (user: MatchProfile) => void;
 };

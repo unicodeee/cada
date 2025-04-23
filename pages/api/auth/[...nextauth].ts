@@ -46,7 +46,7 @@ export const authOptions: NextAuthOptions = {
                     create: {
                         email: profile.email, // Create user if they don't exist
                         name: profile.name!,
-                        avatar: profile.image!,
+                        avatar: user.image || profile.image!,
                     },
                 })
             } catch (err) {
