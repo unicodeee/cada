@@ -3,6 +3,7 @@ import * as React from "react";
 import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import Image from 'next/image';
 
 export default function AppHeader() {
     const { data: session, status } = useSession();
@@ -35,10 +36,12 @@ export default function AppHeader() {
                     </div>
                     <div className="flex items-center gap-3">
                         <span className="text-sm font-medium hidden sm:inline-block">{session.user?.name}</span>
-                        <img
+                        <Image
                             src={session.user?.image || "https://via.placeholder.com/40"}
                             alt="Profile"
                             className="w-7 h-7 rounded-full"
+                            width={40}
+                            height={40}
                         />
                         {/* Sign out button */}
                         <Button
