@@ -3,7 +3,6 @@
 import {Storage} from "@google-cloud/storage";
 import process from "node:process";
 import {prisma} from "@/prisma/prisma";
-import {profileSchema, profileSchema2} from "@/lib/formdata";
 
 
 const storage = new Storage({
@@ -26,7 +25,7 @@ export const getProfile = async (userId: string) => {
     if (!profile) {
         throw new Error("profile bad")
     }
-    const result = await loadImagesFromStorage(userId);
+    const result = await loadFirstImageFromStorage(userId);
     if (!result) {
         throw new Error("Avatar not found for user: ")
     }
@@ -37,6 +36,16 @@ export const getProfile = async (userId: string) => {
 }
 
 
+
+const loadFirstImageFromStorage = async (userId: string): Promise<string | null> => {
+    try {
+        const images = await loadImagesFromStorage(userId);
+        return images ? images[0] : null;
+    } catch (error) {
+        console.error("Error loading images:", error);
+        throw error;
+    }
+};
 
 const loadImagesFromStorage = async (userId: string) => {
     try {
@@ -51,7 +60,7 @@ const loadImagesFromStorage = async (userId: string) => {
         // Filter out any null values (images that couldn't be loaded)
         const validUrls = urls.filter(url => url !== null) as string[];
         if (validUrls.length > 0) {
-            return validUrls[0]; // first url only for avatar
+            return validUrls; // first url only for avatar
         } else {
             return null;
         }

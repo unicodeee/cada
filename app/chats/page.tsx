@@ -19,7 +19,6 @@ import {Sidebar} from "@components/ui/chatpage-ui/chatSideBar";
 import {MatchProfile, MyProfile} from "@/app/types/chats";
 
 
-const FallbackAVATAR = "/cada_heart.png";
 
 
 const messageSchema = z.object({
@@ -36,14 +35,6 @@ const messageSchema = z.object({
     ),
 });
 
-const matchesSchema = z.object({
-    matchId: z.string().optional(),
-    userId: z.string().optional(),
-    name: z.string().optional(),
-    avatar: z.string().optional(),
-    profile: z.string().optional(),
-})
-
 
 export default function ChatPage() {
     // const { data: session } = useSession();
@@ -57,16 +48,12 @@ export default function ChatPage() {
 
     const bottomRef = useRef<HTMLDivElement>(null);
 
-
-
-
-
     const userId = session?.user.userId as string;
 
-    const match = "matches/chats/3b58f3c7-d89e-4536-97c4-b4a9536ce54e";
+    const [selectedMatchPath, setSelectedMatchPath] = useState<string | null>(); // default or null
+
 
     useEffect(() => {
-        
         const fetchMatches = async () => {
             try {
                 const response = await fetch('/api/matches');
@@ -77,17 +64,31 @@ export default function ChatPage() {
                 setMatchProfiles(data);
 
             } catch (error) {
-                console.error('Error uploading photo:', error);
                 throw error;
             }
         }
+        fetchMatches();
+    }, []);
+
+    useEffect(() => {
         const fetchMessages = async () => {
             try {
-                const matchRef = collection(db, match);
 
+                if (!selectedMatchPath) return;
+
+                const matchRef = collection(db, selectedMatchPath);
                 const q = query(matchRef, orderBy("createdAt", "desc"), limit(50));
 
+
                 const unsubscribe = onSnapshot(q, (snapshot) => {
+
+
+                    if (snapshot.empty) {
+                        setMessages([]); // clear UI or show "Start the conversation!"
+                        return;
+                    }
+
+
                     const messages = snapshot.docs.map(doc => {
                         const result = messageSchema.safeParse(doc.data());
                         return result.success ? result.data : null;
@@ -103,16 +104,14 @@ export default function ChatPage() {
                 console.error(e);
             }
         };
-        fetchMatches();
         fetchMessages();
-    }, []);
+    }, [selectedMatchPath]);
+
 
     useEffect(() => {
         const fetchProfile = async () => {
             try {
                 const data = await getProfile(userId);
-
-                console.log("data",data);
                 if (!data) {
                     throw new Error('Failed fetching profile');
                 }
@@ -128,8 +127,6 @@ export default function ChatPage() {
 
         if (userId) {
             fetchProfile();
-            console.log("myProfile", myProfile);
-            console.log("userId", userId);
         }
     }, [userId]);
 
@@ -158,7 +155,7 @@ export default function ChatPage() {
             setValue("");
             bottomRef.current?.scrollIntoView({ behavior: "smooth" });
 
-            await addDoc(collection(db, match), messageToSend.data);
+            await addDoc(collection(db, selectedMatchPath!), messageToSend.data);
             toast.success(`Sent ${messageToSend.data} uploaded!`); // to do
 
         } catch (e) {
@@ -172,17 +169,18 @@ export default function ChatPage() {
         setValue(e.target.value);
     }
 
+    const handleMatchClick = (user: MatchProfile) => {
+        setSelectedMatchPath(`matches/chats/${user.matchId}`);
+    };
+
+
 
     return <div className="flex h-screen w-full overflow-hidden">
         {matchProfiles && myProfile ?
-            <Sidebar matchProfiles={matchProfiles} myProfile={myProfile} />
+            <Sidebar matchProfiles={matchProfiles} myProfile={myProfile}  onClick={handleMatchClick} />
         : myProfile ?
-                <Sidebar myProfile={myProfile} />
+                <Sidebar myProfile={myProfile}  onClick={handleMatchClick}/>
                 : <div>No match found</div>}
-
-
-
-
 
 
         <div className="flex flex-col h-[90vh] w-[850px] mx-auto mt-3 bg-gray-100 border border-gray-300 rounded-2xl">
@@ -193,7 +191,6 @@ export default function ChatPage() {
 
             {/* Chat Area */}
             <div className="flex-grow overflow-y-auto p-4 space-y-4">
-
                 {messages.map(
 
                     (msg, index) =>

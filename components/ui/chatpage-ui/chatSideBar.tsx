@@ -4,13 +4,10 @@ import {Avatar, AvatarFallback, AvatarImage} from "@components/ui/avatar";
 import {ScrollArea, ScrollBar} from "@components/ui/scroll-area";
 import {Separator} from "@components/ui/separator";
 import {Badge} from "@components/ui/badge";
-import {MatchProfile, MyProfile, SidebarProps} from "@/app/types/chats";
+import {SidebarProps} from "@/app/types/chats";
 
 
-
-export const Sidebar = ({ matchProfiles, myProfile }: { matchProfiles?: MatchProfile[]  | null ; myProfile: MyProfile}) => {
-
-    console.log("myProfile", myProfile);
+export const Sidebar = ({ matchProfiles, myProfile, onClick }: SidebarProps) => {
     return (
         <div className="w-[400px] border-r p-4 overflow-y-auto">
             {/* Logo + User Info */}
@@ -20,7 +17,7 @@ export const Sidebar = ({ matchProfiles, myProfile }: { matchProfiles?: MatchPro
 
             <div className="flex items-center gap-4 mb-4">
                 <Avatar>
-                    <AvatarImage src={myProfile?.avatar} />
+                    <AvatarImage src={myProfile?.avatar || undefined} />
                     <AvatarFallback>A</AvatarFallback>
                 </Avatar>
                 <div>
@@ -34,10 +31,10 @@ export const Sidebar = ({ matchProfiles, myProfile }: { matchProfiles?: MatchPro
             {/* Horizontal Avatars */}
             <ScrollArea className="mb-4">
                 <div className="flex space-x-4 pb-2">
-                    {matchProfiles.map((p, i) => (
-                        <div key={i} className="relative">
+                    {(matchProfiles ?? []).map((user, i) => (
+                        <div key={i} className="relative" onClick={() => onClick?.(user)}>
                             <Avatar className="w-12 h-12">
-                                <AvatarImage src={p.avatar} />
+                                <AvatarImage src={user.avatar} />
                                 <AvatarFallback>T</AvatarFallback>
                             </Avatar>
                             <span className="absolute bottom-0 right-0 h-3 w-3 bg-purple-500 rounded-full border-2 border-white" />
@@ -51,8 +48,8 @@ export const Sidebar = ({ matchProfiles, myProfile }: { matchProfiles?: MatchPro
 
             {/* Chat Previews */}
             <div className="space-y-4">
-                {matchProfiles.map((user, i) => (
-                    <div key={i} className="flex justify-between items-start">
+                {(matchProfiles ?? []).map((user, i) => (
+                    <div key={i} className="flex justify-between items-start" onClick={() => onClick?.(user)}>
                         <div className="flex gap-3 items-start">
                             <Avatar>
                                 <AvatarImage src={user.avatar} />
