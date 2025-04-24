@@ -54,17 +54,52 @@ export default function MessagesPage() {
   return (
       <div className="min-h-screen flex flex-col">
         <main className="flex flex-row justify-center items-start gap-20 px-6 py-8 w-full max-w-6xl mx-auto flex-grow">
+          {/* Left side image with stacked bio and hobbies */}
+          {profile && (
           <div className="w-full max-w-md flex justify-center items-start mt-14">
-            <div className="w-[1000px] h-[800px] rounded-2xl overflow-hidden">
+            <div className="w-[500px] h-[550px] rounded-2xl overflow-hidden relative">
               <Image
                   src="/bg-top-left.png"
                   alt="Left Side Pic"
                   width={1000}
-                  height={800}
+                  height={500}
                   className="object-cover rounded-2xl"
+                  // src={ profile.avatar ?? "/fallback.jpg"}
+                  // alt={profile.preferredName ?? "Profile"}
+                  // fill
+                  // sizes="350px"
+                  // className="object-cover"
               />
+
+              {/* Bio and hobbies overlay on the background image */}
+              {profile && (
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent pt-16 pb-6 px-6">
+                    {/* Bio section */}
+                    {profile.description && (
+                        <div className="mb-5">
+                          <h3 className="text-white font-bold text-2xl mb-2">About</h3>
+                          <p className="text-white text-base">{profile.description}</p>
+                        </div>
+                    )}
+
+                    {/* Hobbies */}
+                    {profile.hobbies && profile.hobbies.length > 0 && (
+                        <div>
+                          <h3 className="text-white font-bold text-2xl mb-2">Interests</h3>
+                          <div className="flex flex-wrap gap-2">
+                            {profile.hobbies.map((hobby, index) => (
+                                <span key={index} className="text-sm bg-purple-600 px-4 py-1.5 rounded-full text-white">
+                            {hobby}
+                          </span>
+                            ))}
+                          </div>
+                        </div>
+                    )}
+                  </div>
+              )}
             </div>
           </div>
+              )}
 
           <div className="flex justify-center items-center mt-10">
             <Image
