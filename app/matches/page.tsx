@@ -41,7 +41,7 @@ export default function MessagesPage() {
   }, [userId]);
 
 
-  const handleSwipeRight = async () => {
+  const handleSwipe = async (swipeRight: boolean) => {
     const response = await fetch(`/api/swipes`, {
       method: 'POST',
       headers: {
@@ -50,7 +50,7 @@ export default function MessagesPage() {
       body: JSON.stringify({
         swiperId : userId,
         swipedId : mainProfile?.userId,
-        swipeRight : true
+        swipeRight : swipeRight
       }),
     });
 
@@ -76,7 +76,6 @@ export default function MessagesPage() {
         // toast
       }
     })
-
   }
 
 
@@ -165,6 +164,7 @@ export default function MessagesPage() {
                           variant="ghost"
                           size="icon"
                           className="bg-black/30 text-red-500 border border-red-500 rounded-full"
+                          onClick={() => handleSwipe(false)}
                       >
                         <X />
                       </Button>
@@ -172,7 +172,7 @@ export default function MessagesPage() {
                           variant="ghost"
                           size="icon"
                           className="bg-purple-600 text-white rounded-full"
-                          onClick={handleSwipeRight}
+                          onClick={() => handleSwipe(true)}
                       >
                         <Heart />
                       </Button>
