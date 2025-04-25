@@ -42,7 +42,9 @@ export default function ChatPage() {
     const router = useRouter();
     const [value, setValue] = useState("");
     const [messages, setMessages] = useState<z.infer<typeof messageSchema>[]>([]);
-    
+
+
+    const [chatName, setChatName] = useState<string | null>(); // default or null
     const [matchProfiles, setMatchProfiles] = useState<MatchProfile[]>([]);
     const [myProfile, setMyProfile] = useState<MyProfile>();
 
@@ -171,6 +173,7 @@ export default function ChatPage() {
 
     const handleMatchClick = (user: MatchProfile) => {
         setSelectedMatchPath(`matches/chats/${user.matchId}`);
+        setChatName(user.name || "user");
     };
 
 
@@ -186,7 +189,7 @@ export default function ChatPage() {
         <div className="flex flex-col h-[90vh] w-[850px] mx-auto mt-3 bg-gray-100 border border-gray-300 rounded-2xl">
             {/* Header */}
             <div className="flex items-center justify-between p-4 bg-white shadow-sm rounded-t-2xl">
-                <h1 className="text-xl font-bold">Charlotte</h1>
+                <h1 className="text-xl font-bold">{chatName}</h1>
             </div>
 
             {/* Chat Area */}
