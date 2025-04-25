@@ -33,8 +33,8 @@ model User {
   phone         String?
   avatar        String?
   profile       Profile?
-  swipedUsers   Swipe[]            @relation("Swiper")
-  swipingUsers  Swipe[]            @relation("Swiped")
+  swipedUsers   Swipe[]            @relation("Swiper") // users I swiped on
+  swipingUsers  Swipe[]            @relation("Swiped") // users who swiped on me
   messages      Message[]
   studySessions UserStudySession[]
   matches1      Match[]            @relation("firstUser")
@@ -66,7 +66,7 @@ model Swipe {
   swiper     User     @relation("Swiper", fields: [swiperId], references: [id], onDelete: Cascade)
   swiped     User     @relation("Swiped", fields: [swipedId], references: [id], onDelete: Cascade)
 
-  @@unique([swiperId, swipedId])
+  @@unique([swiperId, swipedId], name: "swiperId_swipedId")
 }
 
 model Match {
