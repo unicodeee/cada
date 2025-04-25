@@ -143,7 +143,7 @@ export default function MessagesPage() {
 
           {/* mainProfile Card */}
           <div className="w-full max-w-md flex justify-center items-start mt-14">
-            {mainProfile && (
+            {mainProfile ? (
                 <div className="relative w-[550px] h-[550px] rounded-2xl overflow-hidden shadow-xl bg-black centered">
                   <Image
                       // src={mainProfile.?.[0] ?? "/fallback.jpg"}
@@ -179,7 +179,7 @@ export default function MessagesPage() {
                     </div>
                   </div>
                 </div>
-            )}
+            ) : <h1>No one matches your preference!</h1>}
           </div>
         </main>
       </div>
