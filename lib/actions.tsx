@@ -42,48 +42,32 @@ export const getProfilesForMatching = async (userId: string) => {
     });
 
     if (!myProfile || !myProfile.genderPreference) {
-        throw new Error("No profile found or gender preference is not set");
+        throw new Error("No profile or gender preference set");
     }
 
-// Get the list of user IDs the current user has swiped
-    const swipedUsers = await prisma.swipe.findMany({
-        where: { swiperId: userId },
-        select: { swipedId: true },
-    });
-    const swipedIds = swipedUsers.map((s) => s.swipedId);
-
-// Get the list of user IDs the current user has matched with
-    const matchedUsers = await prisma.match.findMany({
-        where: {
-            OR: [{ firstUserId: userId }, { secondUserId: userId }],
-        },
-        select: {
-            firstUserId: true,
-            secondUserId: true,
-        },
-    });
-    const matchedIds = matchedUsers.flatMap((m) =>
-        m.firstUserId === userId ? [m.secondUserId] : [m.firstUserId]
-    );
-
-    const excludeIds = [...new Set([...swipedIds, ...matchedIds, userId])];
-
-// Get profiles based on gender preference
-    const profiles = await prisma.profile.findMany({
+    const profilesINeverSwipedOn = await prisma.profile.findMany({
         where: {
             gender: myProfile.genderPreference,
             userId: {
-                notIn: excludeIds,
+                not: userId, // exclude myself
+            },
+            user: {
+                swipingUsers: {
+                    none: {
+                        swiperId: userId, // I haven’t swiped on them
+                    },
+                },
             },
         },
         include: {
             user: true,
         },
+        take: 3, // optional: limit number of results
     });
 
 // Load avatars for each profile
     const profilesWithAvatar = await Promise.all(
-        profiles.map(async (profile) => {
+        profilesINeverSwipedOn.map(async (profile) => {
 
             let avatar: string | null;
             if (process.env.NODE_ENV == "development" ) {

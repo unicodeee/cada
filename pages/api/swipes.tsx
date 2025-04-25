@@ -52,17 +52,24 @@ async function swipe(req: NextApiRequest, res: NextApiResponse) {
 
 
         // Create the swipes
-        const newSwipe = await prisma.swipe.create({
-            data: {
+        const newSwipe = await prisma.swipe.upsert({
+            where: {
+                swiperId_swipedId: {
+                    swiperId,
+                    swipedId,
+                },
+            },
+            update: {
+                swipeRight, // you can choose to update fields if needed
+            },
+            create: {
                 swiperId,
-                swipedId: swipedId as string,
-                swipeRight: swipeRight,
+                swipedId,
+                swipeRight,
             },
         });
-
-
-
         let isMatch = false;
+        let newMatch = {};
 
         if (swipeRight) {
             const existingSwipe = await prisma.swipe.findFirst({
@@ -75,14 +82,15 @@ async function swipe(req: NextApiRequest, res: NextApiResponse) {
 
             if (existingSwipe) {
                 // Create a Match
-                await prisma.match.create({
+                newMatch = await prisma.match.create({
                     data: {
                         firstUserId: swiperId,
                         secondUserId: swipedId as string,
                     },
                 });
-
-                isMatch = true;
+                if (newMatch) {
+                    isMatch = true;
+                }
             }
         }
 
@@ -90,7 +98,8 @@ async function swipe(req: NextApiRequest, res: NextApiResponse) {
         toast.success(isMatch ? "It's a match! 🎉" : "Swipe recorded.");
         return res.status(200).json({
             swipe: newSwipe,
-            match: isMatch,
+            match: newMatch,
+            isMatch: isMatch,
         });
     } catch (error) {
         if (error instanceof Error) {
