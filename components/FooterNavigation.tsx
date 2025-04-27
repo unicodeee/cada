@@ -1,9 +1,8 @@
 "use client";
 import * as React from "react";
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
-import { usePathname } from "next/navigation";
+import {usePathname} from "next/navigation";
 import {
     NavigationMenu,
     NavigationMenuItem,
@@ -13,19 +12,13 @@ import {
 } from "@/components/ui/navigation-menu";
 
 export default function FooterNavigation() {
-    const { data: session, status } = useSession();
     const [profileComplete, setProfileComplete] = useState(false);
     const [profileLoading, setProfileLoading] = useState(true);
-    const pathname = usePathname();
+    const pathname = usePathname() || "";
 
     // Check if profile exists and is complete
     useEffect(() => {
         const checkProfileStatus = async () => {
-            if (status !== "authenticated") {
-                setProfileLoading(false);
-                return;
-            }
-
             try {
                 const response = await fetch(`/api/profiles/`);
 

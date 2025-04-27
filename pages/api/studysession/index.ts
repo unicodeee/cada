@@ -8,7 +8,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         try {
             const sessions = await prisma.studySession.findMany()
             return res.status(200).json(sessions)
-        } catch (error) {
+        } catch {
             return res.status(500).json({ error: 'Error fetching sessions' })
         }
     }
@@ -29,7 +29,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             })
 
             return res.status(201).json(session)
-        } catch (error) {
+        } catch {
             return res.status(500).json({ error: 'Error creating session' })
         }
     }

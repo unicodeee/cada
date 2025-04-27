@@ -2,10 +2,6 @@
 
 import { z } from "zod"
 
-const MIN_AGE = 13;
-const MAX_AGE = 100;
-
-const CURRENT_YEAR = new Date().getFullYear();
 
 // Enum validation for Gender
 const GenderEnum = z.enum([
