@@ -5,6 +5,14 @@ import { useSession, signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 
+interface ImageCarouselProps {
+    images: string[];
+    currentIndex: number;
+    onNext: () => void;
+    onPrev: () => void;
+    altText: string;
+}
+
 export default function TutorialPage() {
     const { data: session, status } = useSession()
     const router = useRouter()
@@ -132,7 +140,8 @@ export default function TutorialPage() {
     }
 
     // Image carousel component - LARGER VERSION
-    const ImageCarousel = ({ images, currentIndex, onNext, onPrev, altText }) => (
+
+    const ImageCarousel = ({ images, currentIndex, onNext, onPrev, altText }: ImageCarouselProps) => (
         <div className="relative rounded-lg overflow-hidden w-full max-w-xl mx-auto shadow-xl">
             {/* Use a more prominent aspect ratio - closer to screenshot */}
             <div className="aspect-[4/5]">
@@ -166,7 +175,7 @@ export default function TutorialPage() {
 
             {/* Larger indicator dots */}
             <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
-                {images.map((_, index) => (
+                {images.map((_, index: number) => (
                     <div
                         key={index}
                         className={`h-3 rounded-full transition-all ${
@@ -194,7 +203,7 @@ export default function TutorialPage() {
                 <section className="text-center mb-16">
                     <h1 className="text-4xl font-bold mb-6">Welcome to CADA</h1>
                     <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                        Let's get you started with finding meaningful connections on campus!
+                        Let&#39;s get you started with finding meaningful connections on campus!
                     </p>
                 </section>
 
@@ -205,12 +214,12 @@ export default function TutorialPage() {
                         <div className="order-2 lg:order-1">
                             <h2 className="text-3xl font-bold mb-6">Create Your Profile</h2>
                             <p className="text-xl text-gray-600 dark:text-gray-300 mb-6">
-                                Tell us about yourself and what you're looking for. This helps us find the perfect matches for you.
+                                Tell us about yourself and what you&#39;re looking for. This helps us find the perfect matches for you.
                             </p>
                             <ul className="list-disc pl-6 text-lg text-gray-600 dark:text-gray-300 space-y-3">
                                 <li>Share your interests and hobbies</li>
                                 <li>Upload your favorite photos</li>
-                                <li>Tell us what you're looking for</li>
+                                <li>Tell us what you&#39;re looking for</li>
                             </ul>
                         </div>
                         <div className="order-1 lg:order-2">
@@ -243,7 +252,7 @@ export default function TutorialPage() {
                             <ul className="list-disc pl-6 text-lg text-gray-600 dark:text-gray-300 space-y-3">
                                 <li>Browse potential matches</li>
                                 <li>See compatibility ratings</li>
-                                <li>Connect with people you're interested in</li>
+                                <li>Connect with people you&#39;re interested in</li>
                             </ul>
                         </div>
                     </section>
