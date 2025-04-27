@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, {JSX, ReactNode} from 'react';
 import { cn } from "@/lib/utils";
 
 type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
