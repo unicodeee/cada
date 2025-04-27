@@ -90,7 +90,7 @@ export const getProfilesForMatching = async (userId: string) => {
 
 const loadFirstImageFromStorage = async (userId: string): Promise<string | null> => {
     try {
-        const images = await loadImagesFromStorage(userId);
+        const images = await load6ImagesFromStorage(userId);
         return images ? images[0] : null;
     } catch (error) {
         console.error("Error loading images:", error);
@@ -98,14 +98,14 @@ const loadFirstImageFromStorage = async (userId: string): Promise<string | null>
     }
 };
 
-const loadImagesFromStorage = async (userId: string) => {
+export const load6ImagesFromStorage = async (userId: string) => {
     try {
         // Try to load 6 images (indexes 0-5)
         const urls = await Promise.all(
             Array(6).fill(null).map((_, index) =>
                 getImageUrl(`${userId}/${index}`)
                     .then(url => url)
-                    .catch(() => null) // Return null if image doesn't exist
+                    .catch(console.error) // Return null if image doesn't exist
             )
         );
         // Filter out any null values (images that couldn't be loaded)
@@ -154,14 +154,19 @@ export const getSignedUrl = async (fileName: string, fileType: string) => {
 
 
 
-export const getImageUrl = async (fileName: string): Promise<string> => {
-    const [url] = await bucket
-        .file(fileName)
-        .getSignedUrl({
-            action: "read", // CHANGE HERE: 'read' instead of 'write'
-            version: "v4",
-            expires: Date.now() + 15 * 60 * 1000, // 15 minutes
-        });
+export const getImageUrl = async (fileName: string): Promise<string | null> => {
+    const file = bucket.file(fileName);
+
+    const [exists] = await file.exists();
+    if (!exists) {
+        return null; // or throw an error if you want
+    }
+
+    const [url] = await file.getSignedUrl({
+        action: "read",
+        version: "v4",
+        expires: Date.now() + 15 * 60 * 1000, // 15 minutes
+    });
 
     return url;
 };
