@@ -216,6 +216,13 @@ export default function MatchesPage() {
                       >
                         <X />
                       </Button>
+                      {/* Match Count Indicator */}
+                      <p className="text-xs text-gray-300 mt-1">
+                        {profileQueue.length > 1
+                            ? `${profileQueue.length - 1} more potential ${profileQueue.length - 1 === 1 ? 'match' : 'matches'}`
+                            : 'Last potential match'}
+                      </p>
+
                       <Button
                           variant="ghost"
                           size="icon"
