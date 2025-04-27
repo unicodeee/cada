@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { Heading } from "@/components/ui/heading";
-import { getImageUrl, getUserIdByEmail } from "@lib/actions";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { Pencil } from "lucide-react";
+import React, {useEffect, useState} from 'react';
+import {useSession} from "next-auth/react";
+import {useRouter} from "next/navigation";
+import {Heading} from "@/components/ui/heading";
+import {load6ImagesFromStorage} from "@lib/actions";
+import {Button} from "@/components/ui/button";
+import {toast} from "sonner";
+import {Pencil} from "lucide-react";
+import Image from "next/image";
 
 // Type definition for profile data
 interface ProfileData {
@@ -34,10 +35,14 @@ export default function ProfilePage() {
     const [imagesLoaded, setImagesLoaded] = useState(false);
 
     // Get user identifier
-    const getUserId = () => {
-        if (!session?.user) return null;
-        return session.user.userId || session.user.id || session.user.email;
-    };
+    // const getUserId = () => {
+    //     if (!session?.user) return null;
+    //     return session.user.userId || session.user.id || session.user.email;
+    // };
+
+
+    const userId = session?.user.userId as string;
+
 
     // Calculate age from date of birth
     const calculateAge = (dateOfBirth?: string) => {
@@ -62,7 +67,6 @@ export default function ProfilePage() {
                 return;
             }
 
-            const userId = getUserId();
             if (!userId) {
                 console.error("No user identifier found in session");
                 setLoading(false);
@@ -127,19 +131,14 @@ export default function ProfilePage() {
         if (profile && !imagesLoaded && session?.user?.email) {
             const loadImagesFromStorage = async () => {
                 try {
-                    const userId = await getUserIdByEmail(session.user.email!);
-
-                    // Try to load 6 images (indexes 0-5)
-                    const urls = await Promise.all(
-                        Array(6).fill(null).map((_, index) =>
-                            getImageUrl(`${userId}/${index}`)
-                                .then(url => url)
-                                .catch(() => null) // Return null if image doesn't exist
-                        )
-                    );
 
                     // Filter out any null values (images that couldn't be loaded)
-                    const validUrls = urls.filter(url => url !== null) as string[];
+                    const validUrls = await load6ImagesFromStorage(userId);
+
+                    if (!validUrls) {
+                        // toast - info
+                        throw new Error("No imgs uploaded or fail to retrieve imgs urls");
+                    }
 
                     if (validUrls.length > 0) {
                         setImageUrls(validUrls);
@@ -282,6 +281,8 @@ export default function ProfilePage() {
     const displayPhotos = imageUrls.length > 0 ? imageUrls : (profile.photos || []);
     const hasPhotos = displayPhotos.length > 0;
 
+    console.log(displayPhotos);
+
     return (
         <div className="container mx-auto px-4 py-6 max-w-2xl">
             {/* Header */}
@@ -308,14 +309,16 @@ export default function ProfilePage() {
                     <div className="aspect-square rounded-lg overflow-hidden max-w-md mx-auto">
                         {hasPhotos ? (
                             <div className="relative w-full h-full">
-                                <img
+                                {/*<Image src="/cada_heart.png" alt="Heart" width={48} height={48} className="w-12 h-12" />*/}
+                                <Image
                                     src={displayPhotos[currentPhotoIndex]}
                                     alt={`Profile photo ${currentPhotoIndex + 1}`}
                                     className="object-cover w-full h-full"
+                                    fill
                                     onError={(e) => {
                                         const target = e.target as HTMLImageElement;
                                         target.onerror = null;
-                                        target.src = 'https://via.placeholder.com/400x400?text=Image+Error';
+                                        target.src = '/no-photo.png';
                                     }}
                                 />
 

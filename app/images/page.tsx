@@ -65,7 +65,7 @@ export default function ImageUploadPage() {
         }
 
         let successCount = 0;
-        let totalUploads = filesToUpload.length;
+        const totalUploads = filesToUpload.length;
 
         for (const { file, index } of filesToUpload) {
             try {

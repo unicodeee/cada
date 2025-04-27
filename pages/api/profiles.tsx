@@ -1,9 +1,7 @@
 // pages/api/profile.ts
-import { NextApiRequest, NextApiResponse } from 'next';
-import { prisma } from '@/prisma/prisma';
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "./auth/[...nextauth]";
-import { getToken } from "next-auth/jwt";
+import {NextApiRequest, NextApiResponse} from 'next';
+import {prisma} from '@/prisma/prisma';
+import {getToken} from "next-auth/jwt";
 import {profileSchema} from "@lib/formdata";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -36,7 +34,6 @@ async function getProfile(userId: string, res: NextApiResponse) {
         if (!profile) {
             return res.status(404).json({ message: "No profile found" });
         }
-        console.log("profile: ", profile);
         return res.status(200).json(profile);
     } catch (error) {
         return res.status(500).json({ message: "Server error", error });
@@ -47,8 +44,6 @@ async function getProfile(userId: string, res: NextApiResponse) {
 async function setProfile(userId: string, req: NextApiRequest, res: NextApiResponse) {
     try {
         // Validate request body
-
-        console.log("req.body: ", req.body);
         const validationResult = profileSchema.safeParse(req.body);
         if (!validationResult.success) {
             return res.status(400).json({ message: "Invalid profile data",
