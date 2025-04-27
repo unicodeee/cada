@@ -1,12 +1,12 @@
 "use client"
-import React, {useState, useEffect} from "react";
+import React, {useEffect, useState} from "react";
 import {useSession} from "next-auth/react";
-import {Input, LargeInput} from "@components/ui/input";
+import {LargeInput} from "@components/ui/input";
 import {Button1} from "@components/ui/button";
-import {allGenders, allHobbies, allSexualOrientations} from "@lib/data";
+import {allGenders, allSexualOrientations} from "@lib/data";
 import {useRouter} from "next/navigation";
-import { toast } from "@/components/ui/use-toast";
-import { SectionHeading } from "@/components/ui/heading";
+import {toast} from "@/components/ui/use-toast";
+import {SectionHeading} from "@/components/ui/heading";
 
 export default function Onboarding(){
     const { data: session, status } = useSession();
@@ -36,23 +36,9 @@ export default function Onboarding(){
         genderPreference: false
     });
 
-    // Get user identifier
-    const getUserId = () => {
-        if (!session?.user) return null;
-        return session.user.userId || session.user.id || session.user.email;
-    };
-
     // Fetch existing profile data when component mounts
     useEffect(() => {
         const fetchProfileData = async () => {
-            if (status !== "authenticated") return;
-
-            const userId = getUserId();
-            if (!userId) {
-                console.error("No user identifier found in session");
-                return;
-            }
-
             try {
                 const response = await fetch(`/api/profiles/`);
 
@@ -70,8 +56,6 @@ export default function Onboarding(){
                         monthBorn = (date.getMonth() + 1).toString().padStart(2, '0'); // Month is 0-indexed
                         yearBorn = date.getFullYear().toString();
                     }
-
-                    console.log("Fetkjhkjjhkhjkhkjhkjched profile data:", profileData);
 
                     setFormData({
                         preferredName: profileData.preferredName || "",
@@ -241,26 +225,6 @@ export default function Onboarding(){
             }
             return;
         }
-
-        if (status !== "authenticated") {
-            toast({
-                title: "Error",
-                description: "You must be logged in to save your profile",
-                variant: "destructive"
-            });
-            return;
-        }
-
-        const userId = getUserId();
-        if (!userId) {
-            toast({
-                title: "Error",
-                description: "Unable to identify user. Please log out and log back in.",
-                variant: "destructive"
-            });
-            return;
-        }
-
         setLoading(true);
 
         try {
@@ -318,7 +282,7 @@ export default function Onboarding(){
                     if (errorData?.message) {
                         errorMessage = errorData.message;
                     }
-                } catch (e) {
+                } catch {
                     // If parsing fails, use status text
                     errorMessage = `Server error: ${response.statusText || response.status}`;
                 }
@@ -379,7 +343,7 @@ export default function Onboarding(){
                                 Hi {session?.user?.name?.split(' ')[0] || "there"}
                             </SectionHeading>
                             <p className="text-gray-600 mb-4">
-                                Create a unique nickname that represents you. It's how others will know and remember you.
+                                Create a unique nickname that represents you. It&#39;s how others will know and remember you.
                             </p>
                             <div>
                                 <LargeInput
@@ -416,10 +380,10 @@ export default function Onboarding(){
                     {/* Right Side - Birthday */}
                     <div>
                         <SectionHeading emoji="🎂">
-                            Let's celebrate you
+                            Let&#39;s celebrate you
                         </SectionHeading>
                         <p className="text-gray-600 mb-4">
-                            Tell us your birthdate. Your profile doesn't display your birthdate, only your age.
+                            Tell us your birthdate. Your profile doesn&#39;t display your birthdate, only your age.
                         </p>
                         <div className="flex gap-4">
                             <LargeInput
@@ -488,7 +452,7 @@ export default function Onboarding(){
                             Gender Preference
                         </SectionHeading>
                         <p className="text-gray-600 mb-4">
-                            Choose the gender you'd like to be matched with.
+                            Choose the gender you&#39;d like to be matched with.
                         </p>
                         <div className="flex flex-col gap-3">
                             {Object.entries(allGenders()).map(([key, value]) => (
