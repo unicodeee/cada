@@ -157,7 +157,7 @@ export default function AboutPage() {
         const allHobbiesList = allHobbies();
         if (!searchTerm) return Object.entries(allHobbiesList);
 
-        return Object.entries(allHobbiesList).filter(([_, value]) =>
+        return Object.entries(allHobbiesList).filter(([, value]) =>
             value.toLowerCase().includes(searchTerm.toLowerCase())
         );
     };
@@ -402,7 +402,7 @@ export default function AboutPage() {
                                     <div className="flex flex-wrap gap-2">
                                         {formData.hobbies.map(hobbyKey => {
                                             // Handle both predefined and custom hobbies
-                                            let displayName = "";
+                                            let displayName: string = "";
 
                                             if (hobbyKey.startsWith('custom_')) {
                                                 // For custom hobbies, format the display name

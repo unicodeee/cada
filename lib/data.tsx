@@ -53,7 +53,11 @@ export const allGenders = () => {
         transwoman: "Trans Woman"
     };
 };
-export const allHobbies=()=>{
+
+interface Hobbies {
+    [key: string]: string;
+}
+export const allHobbies=(): Hobbies=>{
     return{
         travel:"Travel",
         cooking:"Cooking",

@@ -59,9 +59,6 @@ export default function ChatPage() {
         const fetchMatches = async () => {
             try {
                 const response = await fetch('/api/matches');
-                if (!response.ok) {
-                    throw new Error('Failed fetching matches');
-                }
                 const data = await response.json();
                 setMatchProfiles(data);
 
