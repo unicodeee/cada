@@ -206,13 +206,6 @@ export default function MatchesPage() {
                     </h2>
                     <p className="text-sm">{mainProfile.major}</p>
 
-                    {/* Match Count Indicator */}
-                    <p className="text-xs text-gray-300 mt-1">
-                      {profileQueue.length > 1
-                          ? `${profileQueue.length - 1} more potential ${profileQueue.length - 1 === 1 ? 'match' : 'matches'}`
-                          : 'Last potential match'}
-                    </p>
-
                     <div className="flex justify-between mt-4">
                       <Button
                           variant="ghost"

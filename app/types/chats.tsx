@@ -17,4 +17,5 @@ export type SidebarProps = {
     matchProfiles?: MatchProfile[] | null;
     myProfile: MyProfile;
     onClick?: (user: MatchProfile) => void;
+    activeMatchId?: string | null;
 };
