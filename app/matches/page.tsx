@@ -1,14 +1,16 @@
 "use client";
 
-import { useSession } from "next-auth/react";
-import { Button } from "@/components/ui/button";
-import { Heart, X, Loader2 } from "lucide-react";
+import {useSession} from "next-auth/react";
+import {Button} from "@/components/ui/button";
+import {Heart, Loader2, X} from "lucide-react";
 import Image from 'next/image';
-import { useCallback, useEffect, useState } from "react";
-import { profileMatchPageDataSchema } from "@lib/formdata";
+import * as React from "react"; // Import toast functionality
+import {useCallback, useEffect, useState} from "react";
+import {profileMatchPageDataSchema} from "@lib/formdata";
 import z from "zod";
-import { getProfilesForMatching } from "@lib/actions";
-import { toast } from "@/components/ui/use-toast"; // Import toast functionality
+import {getProfilesForMatching} from "@lib/actions";
+import {toast} from "@/components/ui/use-toast";
+
 
 export default function MatchesPage() {
   const { data: session } = useSession();
@@ -44,6 +46,15 @@ export default function MatchesPage() {
     }
   }, [userId]);
 
+  const handleRefresh = async () => {
+    setNeedReloadProfiles(true);
+    toast({
+      title: "🍏🍏🍏",
+      description: `Refreshed`,
+      variant: "default",
+    });
+  }
+
   const handleSwipe = async (swipeRight: boolean) => {
     try {
       if (!mainProfile) return;
@@ -62,6 +73,21 @@ export default function MatchesPage() {
 
       if (!response.ok) {
         throw new Error(response.statusText);
+      }
+
+      if (swipeRight) {
+        toast({
+          title: "💔",
+          description: `You liked ${mainProfile.preferredName}`,
+          variant: "default",
+        });
+      }
+      else {
+        toast({
+          title: "😔",
+          description: `You skipped ${mainProfile.preferredName}`,
+          variant: "destructive",
+        });
       }
 
       // Move to the next profile
@@ -241,7 +267,7 @@ export default function MatchesPage() {
                   <p className="text-gray-600 dark:text-gray-300 mb-6">
                     We couldn&#39;t find anyone matching your preferences right now. Check back later or update your preferences!
                   </p>
-                  <Button onClick={() => setNeedReloadProfiles(true)}>
+                  <Button onClick={handleRefresh}>
                     Refresh Matches
                   </Button>
                 </div>

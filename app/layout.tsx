@@ -7,6 +7,7 @@ import { SessionProvider, useSession } from "next-auth/react";
 import FooterNavigation from "@/components/FooterNavigation";
 import AppHeader from "@/components/AppHeader";
 import { usePathname } from "next/navigation";
+import {Toaster} from "@components/ui/toaster";
 
 interface RootLayoutProps {
     children: ReactNode;
@@ -25,6 +26,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
                         <main className="flex-1">
                             {children}
                         </main>
+                        <Toaster />
                         <ConditionalFooter />
                     </div>
                 </ApplyLoadingStateForPage>
