@@ -72,7 +72,7 @@ export default function ProfileRouter() {
 
                 } else if (response.status === 404) {
                     // Profile doesn't exist, start at onboarding
-                    // router.push('/onboarding');
+                     router.push('/onboarding');
                 } else {
                     console.error("Failed to fetch profile data:", response.status);
                     // On error, just go to main profile page (will handle errors there)
