@@ -43,7 +43,7 @@ export default function ProfileRouter() {
             }
 
             try {
-                const response = await fetch(`/api/profile/`);
+                const response = await fetch(`/api/profiles`);
 
                 if (response.ok) {
                     // Profile exists, check if complete
