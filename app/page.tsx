@@ -1,9 +1,10 @@
 'use client'
 import * as React from "react"
-import { useState, useEffect } from "react"
-import { useSession, signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
+import {useEffect, useState} from "react"
+import {signIn, useSession} from "next-auth/react"
+import {useRouter} from "next/navigation"
+import {Button} from "@/components/ui/button"
+import Image from "next/image";
 
 interface ImageCarouselProps {
     images: string[];
@@ -124,6 +125,15 @@ export default function TutorialPage() {
         // Your existing sign-in UI component
         return (
             <div className="flex flex-col items-center justify-center min-h-screen p-8 pb-20 gap-8 sm:p-20 bg-gray-50 dark:bg-gray-900">
+
+                <Image
+                    src="/cada_heart.png"
+                    alt="SJSU Logo"
+                    width={80}
+                    height={80}
+                    className="mb-6"
+                />
+
                 <main className="flex flex-col gap-6 items-center text-center">
                     <h1 className="text-5xl font-bold">Welcome to CADA: Campus Dating</h1>
                     <Button
