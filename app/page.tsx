@@ -51,16 +51,14 @@ export default function TutorialPage() {
 
     // Match images (replace with actual image paths if you have them)
     const matchImages = [
-        "/profile1.png", // Replace with actual match screenshots
-        "/profile2.png",
-        "/profile3.png"
+        "/match1.png", // Replace with actual match screenshots
+        "/match2.png",
     ]
 
     // Chat images (replace with actual image paths if you have them)
     const chatImages = [
-        "/profile1.png", // Replace with actual chat screenshots
-        "/profile2.png",
-        "/profile3.png"
+        "/chat1.png", // Replace with actual chat screenshots
+        "/chat2.png",
     ]
 
     // Navigation functions for profile images
@@ -266,7 +264,6 @@ export default function TutorialPage() {
                             </p>
                             <ul className="list-disc pl-6 text-lg text-gray-600 dark:text-gray-300 space-y-3">
                                 <li>Send messages to your matches</li>
-                                <li>Share photos and experiences</li>
                                 <li>Arrange to meet in person</li>
                             </ul>
                         </div>
@@ -300,7 +297,7 @@ export default function TutorialPage() {
             {/* Footer with explicit sign out option */}
             <footer className="bg-white dark:bg-gray-800 py-6 shadow-inner mt-15">
                 <div className="container mx-auto px-4 text-center">
-                    <p className="text-gray-600 dark:text-gray-300 mb-4">© 2024 CADA. Campus Dating App. All rights reserved.</p>
+                    <p className="text-gray-600 dark:text-gray-300 mb-4">© 2025 CADA. Campus Dating App. All rights reserved.</p>
                 </div>
             </footer>
         </div>
