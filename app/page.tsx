@@ -123,12 +123,14 @@ export default function TutorialPage() {
     // Not authenticated, show sign in page
     if (!session) {
         return (
-            <div className="relative w-full h-screen bg-gray-900 overflow-hidden">
+            <div className="relative w-full h-screen bg-gray-800 overflow-hidden">
                 {/* watermark */}
                 <Image
                     src="/sjsulogo.png"
                     alt="SJSU Logo"
                     className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-[0.05] w-[4000px] h-[750px]"
+                    width={4000}
+                    height={750}
                 />
 
                 <div className="relative z-10 flex flex-col items-center justify-center w-full h-full px-8 text-center">
