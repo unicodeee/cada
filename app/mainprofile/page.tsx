@@ -7,7 +7,7 @@ import {Heading} from "@/components/ui/heading";
 import {load6ImagesFromStorage} from "@lib/actions";
 import {Button} from "@/components/ui/button";
 import {toast} from "sonner";
-import {Pencil} from "lucide-react";
+import {Pencil, Trash2, X} from "lucide-react";
 import Image from "next/image";
 
 // Type definition for profile data
@@ -33,16 +33,11 @@ export default function ProfilePage() {
     const [incompleteStep, setIncompleteStep] = useState<string | null>(null);
     // Flag to prevent multiple image loading attempts
     const [imagesLoaded, setImagesLoaded] = useState(false);
-
-    // Get user identifier
-    // const getUserId = () => {
-    //     if (!session?.user) return null;
-    //     return session.user.userId || session.user.id || session.user.email;
-    // };
-
+    // Delete confirmation dialog state
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const userId = session?.user.userId as string;
-
 
     // Calculate age from date of birth
     const calculateAge = (dateOfBirth?: string) => {
@@ -202,6 +197,37 @@ export default function ProfilePage() {
         }
     };
 
+    // Handle delete profile
+    const handleDeleteProfile = async () => {
+        if (!userId) return;
+
+        setIsDeleting(true);
+        try {
+            // Call the DELETE API endpoint
+            const response = await fetch('/api/profiles', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.ok) {
+                toast.success("Profile deleted successfully");
+                // Sign out and redirect to login page
+                router.push('/api/auth/signout');
+            } else {
+                const data = await response.json();
+                throw new Error(data.message || "Failed to delete profile");
+            }
+        } catch (error) {
+            console.error("Error deleting profile:", error);
+            toast.error(error instanceof Error ? error.message : "Failed to delete profile");
+        } finally {
+            setIsDeleting(false);
+            setShowDeleteConfirm(false);
+        }
+    };
+
     // Format hobby string for display
     const formatHobby = (hobbyKey: string) => {
         if (hobbyKey.startsWith('custom_')) {
@@ -281,24 +307,72 @@ export default function ProfilePage() {
     const displayPhotos = imageUrls.length > 0 ? imageUrls : (profile.photos || []);
     const hasPhotos = displayPhotos.length > 0;
 
-    console.log(displayPhotos);
-
     return (
         <div className="container mx-auto px-4 py-6 max-w-2xl">
             {/* Header */}
             <header className="mb-4 border-b pb-4 flex justify-between items-center">
                 <Heading>My Profile</Heading>
-                {/* Edit button */}
-                <Button
-                    onClick={handleEditProfile}
-                    variant="outline"
-                    size="sm"
-                    className="flex items-center gap-1"
-                >
-                    <Pencil size={16} />
-                    Edit Profile
-                </Button>
+                <div className="flex gap-2">
+                    {/* Edit button */}
+                    <Button
+                        onClick={handleEditProfile}
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-1"
+                    >
+                        <Pencil size={16} />
+                        Edit Profile
+                    </Button>
+
+                    {/* Delete button */}
+                    <Button
+                        onClick={() => setShowDeleteConfirm(true)}
+                        variant="destructive"
+                        size="sm"
+                        className="flex items-center gap-1"
+                    >
+                        <Trash2 size={16} />
+                        Delete Profile
+                    </Button>
+                </div>
             </header>
+
+            {/* Custom Delete confirmation modal */}
+            {showDeleteConfirm && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-lg max-w-md w-full p-6 shadow-lg">
+                        <div className="flex justify-between items-start mb-4">
+                            <h3 className="text-lg font-semibold">Are you absolutely sure?</h3>
+                            <button
+                                onClick={() => setShowDeleteConfirm(false)}
+                                className="text-gray-500 hover:text-gray-700"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <p className="text-gray-600 mb-6">
+                            This action cannot be undone. This will permanently delete your profile,
+                            all your photos, matches, and messages from our servers.
+                        </p>
+                        <div className="flex justify-end gap-2">
+                            <Button
+                                onClick={() => setShowDeleteConfirm(false)}
+                                variant="outline"
+                                disabled={isDeleting}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                onClick={handleDeleteProfile}
+                                variant="destructive"
+                                disabled={isDeleting}
+                            >
+                                {isDeleting ? "Deleting..." : "Delete Profile"}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Incomplete profile warning if needed */}
             <IncompleteBanner />
