@@ -29,7 +29,13 @@ export default function AppHeader() {
                     <div className="flex items-center gap-3">
                         <Link href="/">
                             <div className="flex items-center gap-3 cursor-pointer">
-                                <Image src="/cada_heart.png" alt="CADA Logo" className="w-7 h-7" />
+                                <Image 
+                                    src="/cada_heart.png" 
+                                    alt="CADA Logo" 
+                                    className="w-7 h-7"
+                                    width={50}
+                                    height={50}
+                                />
                                 <h1 className="text-lg font-bold">CADA</h1>
                             </div>
                         </Link>

@@ -329,7 +329,13 @@ export default function Onboarding(){
         <main className="flex flex-col items-center px-4 py-8 pb-24 w-full max-w-6xl mx-auto">
             {/* Heart Progress */}
             <div className="mb-8 text-center">
-                <Image src="/cada_heart.png" alt="Heart" className="w-20 h-20"/>
+                <Image 
+                    src="/cada_heart.png"
+                    alt="Heart" 
+                    className="w-20 h-20"
+                    width={40}
+                    height={40}
+                />
             </div>
 
             {/* Content */}
