@@ -122,29 +122,35 @@ export default function TutorialPage() {
 
     // Not authenticated, show sign in page
     if (!session) {
-        // Your existing sign-in UI component
         return (
-            <div className="flex flex-col items-center justify-center min-h-screen p-8 pb-20 gap-8 sm:p-20 bg-gray-50 dark:bg-gray-900">
-
-                <Image
-                    src="/cada_heart.png"
+            <div className="relative w-full h-screen bg-gray-900 overflow-hidden">
+                {/* slightly larger, very transparent watermark */}
+                <img
+                    src="/sjsulogo.png"
                     alt="SJSU Logo"
-                    width={80}
-                    height={80}
-                    className="mb-6"
+                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-[0.05] w-[4000px] h-[750px]"
                 />
 
-                <main className="flex flex-col gap-6 items-center text-center">
-                    <h1 className="text-5xl font-bold">Welcome to CADA: Campus Dating</h1>
+                <div className="relative z-10 flex flex-col items-center justify-center w-full h-full px-8 text-center">
+                    <h1 className="text-5xl font-bold text-white mb-4">
+                        CADA: Campus Dating
+                    </h1>
+
+                    <p className="text-xl text-gray-300 mb-8 max-w-xl">
+                        CADA is an exclusive campus dating platform for students.
+                        <br />
+                        Meet, connect, and build real relationships on campus.
+                    </p>
+
                     <Button
-                        className="px-6 py-3 text-lg sm:text-xl font-semibold"
-                        onClick={() => signIn("google")}
+                        onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+                        className="px-8 py-4 bg-purple-600 hover:bg-purple-700 text-white rounded-full text-lg font-semibold shadow-md"
                     >
-                        Sign in with SJSU email
+                        Sign in with your SJSU email
                     </Button>
-                </main>
+                </div>
             </div>
-        )
+        );
     }
 
     // Image carousel component - LARGER VERSION
