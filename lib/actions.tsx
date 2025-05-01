@@ -29,10 +29,10 @@ export const getProfile = async (userId: string) => {
     if (!result) {
         throw new Error("Avatar not found for user: ")
     }
-   return {
+    return {
         ...profile,
-       avatar: result || null
-   };
+        avatar: result || null
+    };
 }
 
 
@@ -54,7 +54,7 @@ export const getProfilesForMatching = async (userId: string) => {
             user: {
                 swipingUsers: {
                     none: {
-                        swiperId: userId, // I haven’t swiped on them
+                        swiperId: userId, // I haven't swiped on them
                     },
                 },
             },
@@ -228,3 +228,58 @@ export async function countObjectsInFolder(userId: string) {
         throw error;
     }
 }
+
+/**
+ * Delete a user's profile and all related data
+ * This includes:
+ * 1. Deleting all their photos from Google Cloud Storage
+ * 2. Deleting their profile from the database
+ * 3. Related data like matches, messages, etc. will be deleted by cascade
+ */
+export const deleteUserProfile = async (userId: string) => {
+    try {
+        // 1. Delete photos from Google Cloud Storage
+        await deleteUserPhotos(userId);
+
+        // 2. Delete profile from database
+        // This will cascade to delete:
+        // - Profile (direct)
+        // - Swipes (via cascading delete from User)
+        // - Matches (via cascading delete from User)
+        // - Messages (via cascading delete from Match)
+        // - StudySessions (via cascading delete from User)
+        // All based on the schema.prisma file
+        await prisma.user.delete({
+            where: { id: userId },
+        });
+
+        return { success: true };
+    } catch (error) {
+        console.error("Error deleting user profile:", error);
+        throw new Error("Failed to delete user profile");
+    }
+};
+
+/**
+ * Delete all photos associated with a user
+ */
+const deleteUserPhotos = async (userId: string) => {
+    try {
+        // Get list of files in the user's folder
+        const [files] = await bucket.getFiles({
+            prefix: `${userId}/`,
+        });
+
+        // Delete each file
+        if (files.length > 0) {
+            await Promise.all(
+                files.map(file => file.delete())
+            );
+        }
+
+        return { success: true };
+    } catch (error) {
+        console.error("Error deleting user photos:", error);
+        throw new Error("Failed to delete user photos");
+    }
+};
