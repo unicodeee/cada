@@ -149,7 +149,7 @@ export default function TutorialPage() {
                     </p>
 
                     <Button
-                        onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+                        onClick={() => signIn("google")}
                         className="px-8 py-4 bg-purple-600 hover:bg-purple-700 text-white rounded-full text-lg font-semibold shadow-md"
                     >
                         Sign in with your SJSU email
