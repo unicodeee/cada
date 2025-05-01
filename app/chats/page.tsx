@@ -406,9 +406,8 @@ export default function ChatPage() {
                                     📚 Study Buddy Mode
                                 </DropdownMenuItem>
                                 <DropdownMenuItem className="text-lg py-2"
-                                                  onClick={() => handleNavigation('/eventpage')}>
-                                    🏫 Campus Social Events
-                                </DropdownMenuItem>
+                                                  onClick={() => window.open('https://events.sjsu.edu/calendar')}>🏫
+                                    Campus Social Events</DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
 
