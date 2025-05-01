@@ -124,7 +124,7 @@ export default function TutorialPage() {
     if (!session) {
         return (
             <div className="relative w-full h-screen bg-gray-900 overflow-hidden">
-                {/* slightly larger, very transparent watermark */}
+                {/* watermark */}
                 <img
                     src="/sjsulogo.png"
                     alt="SJSU Logo"
@@ -132,8 +132,14 @@ export default function TutorialPage() {
                 />
 
                 <div className="relative z-10 flex flex-col items-center justify-center w-full h-full px-8 text-center">
-                    <h1 className="text-5xl font-bold text-white mb-4">
-                        CADA: Campus Dating
+                    {/* heart icon snug up against the heading */}
+                    <h1 className="flex items-center text-5xl font-bold text-white mb-4">
+                        <img
+                            src="/cada_heart.png"
+                            alt="heart icon"
+                            className="w-20 h-20 -mr-2"
+                        />
+                        <span>CADA: Campus Dating</span>
                     </h1>
 
                     <p className="text-xl text-gray-300 mb-8 max-w-xl">
@@ -152,6 +158,7 @@ export default function TutorialPage() {
             </div>
         );
     }
+
 
     // Image carousel component - LARGER VERSION
 
