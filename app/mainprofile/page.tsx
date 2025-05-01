@@ -6,9 +6,9 @@ import {useRouter} from "next/navigation";
 import {Heading} from "@/components/ui/heading";
 import {load6ImagesFromStorage} from "@lib/actions";
 import {Button} from "@/components/ui/button";
-import {toast} from "sonner";
 import {Pencil} from "lucide-react";
 import Image from "next/image";
+import { toast } from "@/components/ui/use-toast";
 
 // Type definition for profile data
 interface ProfileData {
@@ -85,13 +85,26 @@ export default function ProfilePage() {
                 } else if (response.status === 404) {
                     // No profile found - redirect to profile creation
                     router.push('/onboarding');
+                    toast({
+                        title: "Profile is not complete",
+                        description: "Please check your profile details",
+                        variant: "destructive"
+                    });
                 } else {
                     console.error("Failed to fetch profile data");
-                    toast.error("Failed to load profile data");
+                    toast({
+                        title: "Failed to load profile data",
+                        description: "Please check your profile details",
+                        variant: "destructive"
+                    });
                 }
             } catch (error) {
                 console.error('Error fetching profile data:', error);
-                toast.error("Error loading profile");
+                toast({
+                    title: "Failed to load profile data",
+                    description: "Please check your profile details",
+                    variant: "destructive"
+                });
             } finally {
                 setLoading(false);
             }
@@ -137,6 +150,11 @@ export default function ProfilePage() {
 
                     if (!validUrls) {
                         // toast - info
+                        toast({
+                            title: "Missing Information",
+                            description: "Please select at least one hobby or interest",
+                            variant: "destructive"
+                        });
                         throw new Error("No imgs uploaded or fail to retrieve imgs urls");
                     }
 
