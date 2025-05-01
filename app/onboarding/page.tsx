@@ -7,6 +7,7 @@ import {allGenders, allSexualOrientations} from "@lib/data";
 import {useRouter} from "next/navigation";
 import {toast} from "@/components/ui/use-toast";
 import {SectionHeading} from "@/components/ui/heading";
+import Image from "next/image";
 
 export default function Onboarding(){
     const { data: session, status } = useSession();
@@ -328,7 +329,7 @@ export default function Onboarding(){
         <main className="flex flex-col items-center px-4 py-8 pb-24 w-full max-w-6xl mx-auto">
             {/* Heart Progress */}
             <div className="mb-8 text-center">
-                <img src="/cada_heart.png" alt="Heart" className="w-20 h-20"/>
+                <Image src="/cada_heart.png" alt="Heart" className="w-20 h-20"/>
             </div>
 
             {/* Content */}
