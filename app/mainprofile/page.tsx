@@ -339,7 +339,8 @@ export default function ProfilePage() {
 
             {/* Custom Delete confirmation modal */}
             {showDeleteConfirm && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+                     onClick={() => setShowDeleteConfirm(false)}>
                     <div className="bg-white rounded-lg max-w-md w-full p-6 shadow-lg">
                         <div className="flex justify-between items-start mb-4">
                             <h3 className="text-lg font-semibold">Are you absolutely sure?</h3>
