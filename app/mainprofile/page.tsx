@@ -6,9 +6,12 @@ import {useRouter} from "next/navigation";
 import {Heading} from "@/components/ui/heading";
 import {load6ImagesFromStorage} from "@lib/actions";
 import {Button} from "@/components/ui/button";
-import {toast} from "sonner";
 import {Pencil, Trash2, X} from "lucide-react";
 import Image from "next/image";
+import {collection, deleteDoc, getDocs} from "firebase/firestore"
+import db from "@lib/firestore"
+import {toast} from "@/components/ui/use-toast";
+
 
 // Type definition for profile data
 interface ProfileData {
@@ -54,6 +57,59 @@ export default function ProfilePage() {
         return age;
     };
 
+    const fetchMatches = async () => {
+        try {
+            const response = await fetch('/api/matches');
+
+            if (response.status === 404) {
+                // Handle the "No matches found" case specifically
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch matches: ${response.statusText}`);
+            }
+            return await response.json();
+        } catch (error) {
+            console.error("Error fetching matches:", error);
+        }
+    }
+
+
+    const deleteAllMatchesFromFirebase = async () => {
+        try {
+            const matches = await fetchMatches(); // This should give you an array of matchId strings
+
+            if (!matches || matches.length === 0) {
+                toast({
+                    title: "All clear",
+                    description: `All of your matches were deleted.`,
+                    variant: "default",
+                });
+
+                return;
+            }
+
+            for (const match of matches) {
+                const messagesCollectionRef = collection(db, `matches/chats/${match.matchId}`);
+                const messagesSnapshot = await getDocs(messagesCollectionRef);
+
+                for (const docSnap of messagesSnapshot.docs) {
+                    await deleteDoc(docSnap.ref);
+                }
+            }
+
+            toast({
+                title: "All clear",
+                description: `All of your matches were deleted.`,
+                variant: "default",
+            });
+
+        } catch (error) {
+            console.error("Error deleting matches from Firebase:", error);
+        }
+    };
+
     // Fetch profile data and check completeness
     useEffect(() => {
         const fetchProfileData = async () => {
@@ -81,12 +137,18 @@ export default function ProfilePage() {
                     // No profile found - redirect to profile creation
                     router.push('/onboarding');
                 } else {
-                    console.error("Failed to fetch profile data");
-                    toast.error("Failed to load profile data");
+                    toast({
+                        title: "Profile Issues:",
+                        description: `Failed to load profile data.`,
+                        variant: "destructive",
+                    });
                 }
-            } catch (error) {
-                console.error('Error fetching profile data:', error);
-                toast.error("Error loading profile");
+            } catch {
+                toast({
+                    title: "Profile Issues:",
+                    description: `Error fetching profile data`,
+                    variant: "destructive",
+                });
             } finally {
                 setLoading(false);
             }
@@ -204,6 +266,8 @@ export default function ProfilePage() {
         setIsDeleting(true);
         try {
             // Call the DELETE API endpoint
+
+
             const response = await fetch('/api/profiles', {
                 method: 'DELETE',
                 headers: {
@@ -211,17 +275,30 @@ export default function ProfilePage() {
                 },
             });
 
+            deleteAllMatchesFromFirebase();
+
             if (response.ok) {
-                toast.success("Profile deleted successfully");
+                toast({
+                    title: "Delete profile success",
+                    description: "Profile deleted successfully",
+                    variant: "default",
+                });
+
                 // Sign out and redirect to login page
-                router.push('/api/auth/signout');
+                setTimeout(() => {
+                    router.push('/api/auth/signout');
+                }, 3000); // 3 secs
             } else {
                 const data = await response.json();
                 throw new Error(data.message || "Failed to delete profile");
             }
         } catch (error) {
-            console.error("Error deleting profile:", error);
-            toast.error(error instanceof Error ? error.message : "Failed to delete profile");
+            toast({
+                title: "All clear",
+                description:  error instanceof Error ? error.message : "Failed to delete profile",
+                variant: "destructive",
+            });
+
         } finally {
             setIsDeleting(false);
             setShowDeleteConfirm(false);
